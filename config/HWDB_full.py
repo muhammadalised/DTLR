@@ -2,7 +2,7 @@ _base_ = ['coco_transformer.py']
 
 num_classes=7356
 
-lr =  1e-5
+lr =  1e-3
 param_dict_type = 'default'
 lr_backbone = 1e-05
 lr_backbone_names = ['backbone.0']
@@ -111,6 +111,6 @@ ema_decay = 0.9997
 ema_epoch = 0
 
 use_detached_boxes_dec_out = False
-max_iterations = 10
+max_iterations = 10000
 mode_chr =False
 eval_epoch = 10
