@@ -1,4 +1,4 @@
-CUDA_VISIBLE_DEVICES=0 python main_RIMES.py \
+python finetuning.py \
 	--device cuda:0 \
 	--new_class_embedding --smart_mapping \
 	--resume_finetuning \
