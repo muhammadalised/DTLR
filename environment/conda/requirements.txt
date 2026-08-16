@@ -1,0 +1,6 @@
+--extra-index-url https://download.pytorch.org/whl/cu118
+-r ../cuda-linux/requirements.txt
+
+torch==2.1.0+cu118
+torchvision==0.16.0+cu118
+git+https://github.com/cocodataset/panopticapi.git@7bb4655548f98f3fedc07bf37e9040a992b054b0

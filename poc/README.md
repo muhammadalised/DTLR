@@ -34,15 +34,15 @@ The same distinction will later apply to READ: `german-pretrained` is not a
 
 ## Expected external layout
 
-The compose mounts expose these paths inside the container:
+Use absolute Linux/WSL paths outside the repository:
 
 ```text
-/mnt/dtlr-data/
+~/dtlr-data/
   IAM_new/labels.pkl
   IAM_new/data/imgs/lines/*.jpg
-/mnt/dtlr-weights/
+~/dtlr-weights/
   finetuned/IAM/checkpoint.pth
-/mnt/dtlr-output/
+~/dtlr-output/
 ```
 
 The upstream repository already tracks a small IAM `labels.pkl`; prefer the copy
@@ -51,23 +51,29 @@ hash. Dataset images, checkpoints, detections, and exports must stay outside Git
 
 ## Milestone run on Linux/WSL + RTX 4060
 
-First follow [the CUDA environment guide](../environment/cuda-linux/README.md).
+First follow [the Conda environment guide](../environment/conda/README.md), then
+activate the environment and load the external path configuration:
+
+```bash
+conda activate dtlr-poc
+source environment/conda/activate.sh
+set -a; source .env; set +a
+```
+
 Then run a small, deterministic slice:
 
 ```bash
-docker compose --env-file .env -f environment/cuda-linux/compose.yaml run --rm dtlr \
-  python poc/scripts/export_iam_detections.py \
-  --data-root /mnt/dtlr-data \
-  --checkpoint /mnt/dtlr-weights/finetuned/IAM/checkpoint.pth \
+python poc/scripts/export_iam_detections.py \
+  --data-root "${DTLR_DATA_ROOT}" \
+  --checkpoint "${DTLR_WEIGHTS_ROOT}/finetuned/IAM/checkpoint.pth" \
   --checkpoint-kind iam-finetuned \
   --split test --start 0 --limit 8 --threshold 0.3 --nms 0.5 \
-  --output /mnt/dtlr-output/iam-test-small/detections.jsonl
+  --output "${DTLR_OUTPUT_ROOT}/iam-test-small/detections.jsonl"
 
-docker compose --env-file .env -f environment/cuda-linux/compose.yaml run --rm dtlr \
-  python poc/scripts/build_bigram_evidence.py \
-  --detections /mnt/dtlr-output/iam-test-small/detections.jsonl \
-  --data-root /mnt/dtlr-data \
-  --output-dir /mnt/dtlr-output/iam-test-small/bigrams
+python poc/scripts/build_bigram_evidence.py \
+  --detections "${DTLR_OUTPUT_ROOT}/iam-test-small/detections.jsonl" \
+  --data-root "${DTLR_DATA_ROOT}" \
+  --output-dir "${DTLR_OUTPUT_ROOT}/iam-test-small/bigrams"
 ```
 
 The second command writes row-level evidence and split-specific aggregates in
@@ -87,7 +93,7 @@ PYTHONPATH=poc python -m unittest discover -s poc/tests -v
 For each retained run, save outside Git:
 
 - repository commit and `git diff --stat` (a dirty tree must be stated);
-- container image ID/digest, `pip freeze`, NVIDIA driver, and GPU name;
+- `conda env export`, `pip freeze`, NVIDIA driver, CUDA toolkit, and GPU name;
 - checkpoint kind, original filename/source, and SHA-256;
 - IAM archive/preprocessing provenance and hashes for `labels.pkl` and the line list;
 - split, start/IDs, thresholds, NMS, binarization threshold, and output hashes;

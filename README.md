@@ -18,7 +18,7 @@ This repository is the official implementation for [General Detection-based Text
 the paper is available on [arXiv](https://arxiv.org/pdf/2409.17095).
 
 > **August 28 TVA proof of concept:** the additive IAM bigram adapter and the
-> reproducible Linux/WSL CUDA environment are documented in
+> reproducible Linux/WSL Conda environment are documented in
 > [`poc/README.md`](poc/README.md). CUDA builds are intentionally unsupported on
 > Apple Silicon.
 
@@ -153,4 +153,3 @@ booktitle={NeurIPS},
 year={2024}},
 url={https://arxiv.org/abs/2409.17095},  
 ```
-

@@ -1,6 +1,8 @@
-# Reproducible CUDA environment
+# Optional Docker CUDA environment
 
-This is the supported POC runtime: Linux x86-64 (native or WSL2), NVIDIA driver
+The primary native workflow is documented in
+[`environment/conda/README.md`](../conda/README.md). This Docker variant is an
+optional isolation fallback using Linux x86-64 (native or WSL2), NVIDIA driver
 compatible with CUDA 11.8, Python 3.11.0, PyTorch 2.1.0+cu118, and an RTX 4060
 (compute capability 8.9). Do not build the CUDA extensions on Apple Silicon.
 

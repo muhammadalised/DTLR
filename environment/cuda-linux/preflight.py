@@ -35,7 +35,7 @@ def main() -> int:
     if torch.version.cuda != "11.8":
         errors.append("expected PyTorch CUDA runtime 11.8")
     if args.require_gpu and not torch.cuda.is_available():
-        errors.append("CUDA GPU is not visible; check NVIDIA driver/container toolkit")
+        errors.append("CUDA GPU is not visible; check the NVIDIA driver and CUDA setup")
     if torch.cuda.is_available():
         report["gpu"] = torch.cuda.get_device_name(0)
         report["compute_capability"] = ".".join(map(str, torch.cuda.get_device_capability(0)))
