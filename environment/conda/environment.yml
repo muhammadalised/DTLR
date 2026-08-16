@@ -1,5 +1,6 @@
 name: dtlr-poc
 channels:
+  - nvidia/label/cuda-11.8.0
   - conda-forge
 dependencies:
   - python=3.11.0
@@ -7,3 +8,6 @@ dependencies:
   - setuptools=75.6.0
   - wheel=0.45.1
   - ninja=1.12.1
+  # Compiler and development libraries for the custom PyTorch CUDA operators.
+  # This intentionally shadows any newer system CUDA toolkit.
+  - cuda=11.8.0

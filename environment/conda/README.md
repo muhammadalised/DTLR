@@ -9,18 +9,17 @@ compiled for the RTX 4060's compute capability 8.9.
 
 - Linux x86-64 or WSL2, not native Windows Python
 - a current NVIDIA driver with `nvidia-smi` working in the Linux/WSL shell
-- the CUDA 11.8 toolkit, including `nvcc`, at `/usr/local/cuda`
 - Conda or Miniforge
 
 Check the host before creating the environment:
 
 ```bash
 nvidia-smi
-nvcc --version
 uname -m
 ```
 
-`uname -m` must print `x86_64` and `nvcc` must report release 11.8.
+`uname -m` must print `x86_64`. The Conda environment installs its own CUDA 11.8
+toolkit, including `nvcc`; a newer system toolkit can remain installed.
 
 ## Create and verify
 
@@ -41,6 +40,19 @@ needed after changing Python, PyTorch, CUDA, extension sources, or GPU architect
 rm -rf .native  # only this generated cache
 source environment/conda/activate.sh
 bash environment/cuda-linux/build_extensions.sh
+```
+
+If the environment already existed before CUDA 11.8 was added to this file,
+update it before rebuilding:
+
+```bash
+conda env update -n dtlr-poc -f environment/conda/environment.yml --prune
+conda activate dtlr-poc
+source environment/conda/activate.sh
+which nvcc
+nvcc --version  # must report release 11.8
+rm -rf .native  # remove only the failed/generated native cache
+bash environment/conda/setup.sh
 ```
 
 ## Data and output paths

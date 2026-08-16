@@ -6,6 +6,18 @@ case "$(uname -s)/$(uname -m)" in
   *) echo "Refusing CUDA extension build on $(uname -s)/$(uname -m); use Linux x86_64." >&2; exit 2 ;;
 esac
 
+nvcc_path="${CUDA_HOME:-/usr/local/cuda}/bin/nvcc"
+if [[ ! -x "${nvcc_path}" ]]; then
+  echo "CUDA compiler not found at ${nvcc_path}. Activate the Conda environment helper first." >&2
+  exit 2
+fi
+nvcc_version="$(${nvcc_path} --version)"
+if [[ "${nvcc_version}" != *"release 11.8"* ]]; then
+  echo "Refusing CUDA extension build: ${nvcc_path} is not CUDA 11.8." >&2
+  echo "${nvcc_version}" >&2
+  exit 2
+fi
+
 python - <<'PY'
 import torch
 assert torch.__version__.startswith("2.1.0"), torch.__version__

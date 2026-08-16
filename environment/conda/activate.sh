@@ -11,6 +11,11 @@ dtlr_activate_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export DTLR_REPO_ROOT="$(cd "${dtlr_activate_dir}/../.." && pwd)"
 export DTLR_NATIVE_ROOT="${DTLR_REPO_ROOT}/.native"
 export PYTHONPATH="${DTLR_NATIVE_ROOT}:${DTLR_REPO_ROOT}:${PYTHONPATH:-}"
-export CUDA_HOME="${CUDA_HOME:-/usr/local/cuda}"
+if [[ -n "${CONDA_PREFIX:-}" && -x "${CONDA_PREFIX}/bin/nvcc" ]]; then
+  export CUDA_HOME="${CONDA_PREFIX}"
+  export PATH="${CONDA_PREFIX}/bin:${PATH}"
+else
+  export CUDA_HOME="${CUDA_HOME:-/usr/local/cuda}"
+fi
 export TORCH_CUDA_ARCH_LIST="${TORCH_CUDA_ARCH_LIST:-8.9}"
 unset dtlr_activate_dir

@@ -19,7 +19,12 @@ python -m pip install -r "${script_dir}/requirements.txt"
 export DTLR_REPO_ROOT="${repo_root}"
 export DTLR_NATIVE_ROOT="${repo_root}/.native"
 export PYTHONPATH="${DTLR_NATIVE_ROOT}:${repo_root}:${PYTHONPATH:-}"
-export CUDA_HOME="${CUDA_HOME:-/usr/local/cuda}"
+if [[ -n "${CONDA_PREFIX:-}" && -x "${CONDA_PREFIX}/bin/nvcc" ]]; then
+  export CUDA_HOME="${CONDA_PREFIX}"
+  export PATH="${CONDA_PREFIX}/bin:${PATH}"
+else
+  export CUDA_HOME="${CUDA_HOME:-/usr/local/cuda}"
+fi
 export TORCH_CUDA_ARCH_LIST="${TORCH_CUDA_ARCH_LIST:-8.9}"
 
 cd "${repo_root}"
