@@ -17,6 +17,11 @@
 This repository is the official implementation for [General Detection-based Text Line Recognition](https://detection-based-text-line-recognition.github.io/), 
 the paper is available on [arXiv](https://arxiv.org/pdf/2409.17095).
 
+> **August 28 TVA proof of concept:** the additive IAM bigram adapter and the
+> reproducible Linux/WSL CUDA environment are documented in
+> [`poc/README.md`](poc/README.md). CUDA builds are intentionally unsupported on
+> Apple Silicon.
+
 This repository builds on the code for [DINO-DETR](https://github.com/IDEA-Research/DINO), the official implementation of the paper "[DINO: DETR with Improved DeNoising Anchor Boxes for End-to-End Object Detection](https://arxiv.org/abs/2203.03605)". We present a model that adapts DINO-DETR for text recognition as a detection and recognition task. The model is pretrained on synthetic data using the same loss as DINO-DETR and then fine-tuned on a real dataset with CTC loss.
 <p align="center">
   <img src="figures/architecture.jpg">
@@ -148,5 +153,4 @@ booktitle={NeurIPS},
 year={2024}},
 url={https://arxiv.org/abs/2409.17095},  
 ```
-
 

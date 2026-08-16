@@ -1,0 +1,50 @@
+{
+  "schema_version": "dtlr.run-provenance.v1",
+  "run_id": "YYYYMMDD-iam-small-001",
+  "created_utc": "",
+  "repository": {
+    "upstream_url": "https://github.com/raphael-baena/dtlr.git",
+    "upstream_base_commit": "4480f6f3499bd90b40e77e372459c4895482de9c",
+    "run_commit": "",
+    "dirty": false,
+    "diff_stat": ""
+  },
+  "runtime": {
+    "container_image": "dtlr-poc:cuda11.8-torch2.1-py311",
+    "container_digest": "",
+    "python": "3.11.0",
+    "pytorch": "2.1.0+cu118",
+    "cuda": "11.8",
+    "nvidia_driver": "",
+    "gpu": "NVIDIA GeForce RTX 4060"
+  },
+  "checkpoint": {
+    "kind": "iam-finetuned",
+    "original_filename": "checkpoint.pth",
+    "source_url": "",
+    "sha256": ""
+  },
+  "dataset": {
+    "name": "IAM",
+    "license_or_access_note": "",
+    "preprocessing_source": "PyLaia IAM example workflow referenced by upstream DTLR",
+    "labels_sha256": "",
+    "split": "test",
+    "line_ids": []
+  },
+  "inference": {
+    "threshold": 0.3,
+    "nms_iou": 0.5
+  },
+  "ccl": {
+    "connectivity": 8,
+    "threshold": "otsu-per-line",
+    "connected_definition": "one component intersects both aligned boxes"
+  },
+  "visual_qa": {
+    "reviewer": "",
+    "decision": "pending",
+    "notes": ""
+  },
+  "outputs": []
+}

@@ -1,0 +1,20 @@
+# Runtime pins for the August 28 POC. Torch is installed separately from the
+# official cu118 wheel index in Dockerfile.
+addict==2.4.0
+Cython==3.0.11
+editdistance==0.8.1
+fonttools==4.55.3
+matplotlib==3.9.3
+numpy==1.26.4
+opencv-python-headless==4.10.0.84
+pandas==2.2.3
+Pillow==11.0.0
+pycocotools==2.0.8
+pytorch-ignite==0.5.1
+PyYAML==6.0.2
+scikit-image==0.24.0
+scipy==1.14.1
+termcolor==2.5.0
+timm==0.9.12
+wandb==0.19.1
+yapf==0.43.0

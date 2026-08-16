@@ -1,0 +1,19 @@
+services:
+  dtlr:
+    build:
+      context: ../..
+      dockerfile: environment/cuda-linux/Dockerfile
+    image: dtlr-poc:cuda11.8-torch2.1-py311
+    working_dir: /workspace/dtlr
+    shm_size: 8gb
+    gpus: all
+    volumes:
+      - ../../:/workspace/dtlr
+      - ${DTLR_DATA_ROOT:?set DTLR_DATA_ROOT}:/mnt/dtlr-data:ro
+      - ${DTLR_WEIGHTS_ROOT:?set DTLR_WEIGHTS_ROOT}:/mnt/dtlr-weights:ro
+      - ${DTLR_OUTPUT_ROOT:?set DTLR_OUTPUT_ROOT}:/mnt/dtlr-output
+    environment:
+      DTLR_DATA_ROOT: /mnt/dtlr-data
+      DTLR_WEIGHTS_ROOT: /mnt/dtlr-weights
+      DTLR_OUTPUT_ROOT: /mnt/dtlr-output
+      CUDA_VISIBLE_DEVICES: "0"

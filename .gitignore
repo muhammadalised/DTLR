@@ -1,0 +1,52 @@
+# Local environments and Python build products
+.venv/
+venv/
+env/
+.conda/
+.native/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+
+# DTLR native extensions are host-, Python-, PyTorch-, and CUDA-specific.
+*.so
+*.dylib
+*.o
+*.egg
+models/dino/ops/build/
+models/dino/ops/dist/
+models/dino/cuda_op/build/
+
+# Restricted/licensed datasets. Some small metadata files are already tracked
+# by the upstream repository; this prevents adding new dataset payloads.
+data/**
+datasets-local/
+external-data/
+
+# Model artifacts (pretrained and fine-tuned alike)
+logs/
+weights/
+checkpoints/
+*.pth
+*.pt
+*.ckpt
+*.safetensors
+
+# POC outputs can become large and may contain derived dataset information.
+outputs/
+detections/
+stats_dect/
+artifacts/
+*.npy
+*.npz
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+wandb/
+.DS_Store
