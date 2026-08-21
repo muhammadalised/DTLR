@@ -43,8 +43,26 @@ class CCLTests(unittest.TestCase):
         )
         self.assertTrue(result["connected_exclusive_core_v2"])
         self.assertFalse(result["connected_exclusive_core_v2_1"])
+        self.assertFalse(result["connected_dominant_core_v3"])
         self.assertEqual(result["left_core_box"][2], 4)
         self.assertEqual(result["right_core_box"][0], 5)
+
+    def test_dominant_components_reject_cross_core_leakage(self):
+        image = np.full((7, 12), 255, dtype=np.uint8)
+        image[3, 1:7] = 0
+        image[1:6, 8] = 0
+        labels, _ = label_ink(image, threshold=100)
+        result = pair_component_evidence(
+            labels,
+            [0, 0, 6, 7],
+            [4, 0, 12, 7],
+        )
+        self.assertTrue(result["connected_exclusive_core_v2_1"])
+        self.assertTrue(result["dominant_core_usable"])
+        self.assertFalse(result["connected_dominant_core_v3"])
+        self.assertNotEqual(
+            result["left_dominant_component"], result["right_dominant_component"]
+        )
 
 
 class AggregationTests(unittest.TestCase):
@@ -75,7 +93,7 @@ class AggregationTests(unittest.TestCase):
         self.assertEqual(row["pair"], "ab")
         self.assertEqual(row["right_alignment"], "substitute")
         self.assertTrue(row["connected"])
-        self.assertEqual(row["connectivity_method"], "exclusive-core-v2.1")
+        self.assertEqual(row["connectivity_method"], "dominant-core-v3")
 
     def test_exclusive_cores_reject_overlap_false_positive(self):
         image = np.full((7, 12), 255, dtype=np.uint8)
@@ -99,6 +117,7 @@ class AggregationTests(unittest.TestCase):
         self.assertTrue(row["exclusive_core_usable"])
         self.assertFalse(row["connected_exclusive_core_v2"])
         self.assertFalse(row["connected_exclusive_core_v2_1"])
+        self.assertFalse(row["connected_dominant_core_v3"])
         self.assertFalse(row["connected"])
         self.assertEqual(row["left_exclusive_core_xyxy"], [0, 0, 4, 7])
         self.assertEqual(row["right_exclusive_core_xyxy"], [6, 0, 12, 7])

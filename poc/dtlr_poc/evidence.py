@@ -10,8 +10,8 @@ from .alignment import gt_detection_map
 from .ccl import label_ink, pair_component_evidence
 
 
-SCHEMA_VERSION = "dtlr.bigram-evidence.v3"
-CONNECTIVITY_METHOD = "exclusive-core-v2.1"
+SCHEMA_VERSION = "dtlr.bigram-evidence.v4"
+CONNECTIVITY_METHOD = "dominant-core-v3"
 
 
 def line_evidence(record: dict, data_root: Path, threshold: int | None = None) -> list[dict]:
@@ -53,6 +53,12 @@ def line_evidence(record: dict, data_root: Path, threshold: int | None = None) -
             "shared_component_count_exclusive_core_v2": None,
             "connected_exclusive_core_v2_1": None,
             "shared_component_count_exclusive_core_v2_1": None,
+            "dominant_core_usable": False,
+            "connected_dominant_core_v3": None,
+            "left_dominant_component_id": None,
+            "right_dominant_component_id": None,
+            "left_dominant_component_share": None,
+            "right_dominant_component_share": None,
             "ccl_component_count": component_count,
         }
         if left_alignment.detection_index is not None and right_alignment.detection_index is not None:
@@ -60,12 +66,16 @@ def line_evidence(record: dict, data_root: Path, threshold: int | None = None) -
             right_box = detections[right_alignment.detection_index]["box_xyxy"]
             component_evidence = pair_component_evidence(labels, left_box, right_box)
             core_usable = component_evidence["exclusive_core_usable"]
+            dominant_usable = component_evidence["dominant_core_usable"]
             shared_core = component_evidence["shared_core_components"]
             row.update({
                 "alignment_usable": True,
-                "usable": core_usable,
-                "connected": component_evidence["connected_exclusive_core_v2_1"],
-                "shared_component_count": len(shared_core) if core_usable else None,
+                "usable": dominant_usable,
+                "connected": component_evidence["connected_dominant_core_v3"],
+                "shared_component_count": (
+                    int(component_evidence["connected_dominant_core_v3"])
+                    if dominant_usable else None
+                ),
                 "connected_box_intersection_v1": component_evidence["connected_box_intersection_v1"],
                 "shared_component_count_box_intersection_v1": len(component_evidence["shared_full_components"]),
                 "exclusive_core_usable_v2": component_evidence["exclusive_core_usable_v2"],
@@ -77,6 +87,14 @@ def line_evidence(record: dict, data_root: Path, threshold: int | None = None) -
                 ),
                 "connected_exclusive_core_v2_1": component_evidence["connected_exclusive_core_v2_1"],
                 "shared_component_count_exclusive_core_v2_1": len(shared_core) if core_usable else None,
+                "dominant_core_usable": dominant_usable,
+                "connected_dominant_core_v3": component_evidence["connected_dominant_core_v3"],
+                "left_dominant_component_id": component_evidence["left_dominant_component"],
+                "right_dominant_component_id": component_evidence["right_dominant_component"],
+                "left_dominant_component_share": component_evidence["left_dominant_share"],
+                "right_dominant_component_share": component_evidence["right_dominant_share"],
+                "left_core_component_pixel_counts": component_evidence["left_core_component_pixel_counts"],
+                "right_core_component_pixel_counts": component_evidence["right_core_component_pixel_counts"],
                 "left_score": detections[left_alignment.detection_index]["score"],
                 "right_score": detections[right_alignment.detection_index]["score"],
                 "left_box_xyxy": left_box,
@@ -97,7 +115,10 @@ def write_evidence(rows: list[dict], csv_path: Path, json_path: Path) -> None:
         writer = csv.DictWriter(handle, fieldnames=fields)
         writer.writeheader()
         for row in rows:
-            writer.writerow({k: json.dumps(v, ensure_ascii=False) if isinstance(v, list) else v for k, v in row.items()})
+            writer.writerow({
+                k: json.dumps(v, ensure_ascii=False) if isinstance(v, (list, dict)) else v
+                for k, v in row.items()
+            })
     json_path.write_text(json.dumps(rows, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
@@ -120,8 +141,13 @@ def aggregate(rows: list[dict]) -> list[dict]:
             if item.get("connected_exclusive_core_v2", item["connected"])
             != item.get("connected_exclusive_core_v2_1", item["connected"])
         ]
+        v2_1_v3_disagreements = [
+            item for item in usable
+            if item.get("connected_exclusive_core_v2_1", item["connected"])
+            != item.get("connected_dominant_core_v3", item["connected"])
+        ]
         result.append({
-            "schema_version": "dtlr.bigram-scores.v3",
+            "schema_version": "dtlr.bigram-scores.v4",
             "dataset": dataset,
             "split": split,
             "pair": pair,
@@ -134,6 +160,7 @@ def aggregate(rows: list[dict]) -> list[dict]:
             "n_exact_alignment": len(exact),
             "n_v1_v2_1_disagreement": len(v1_v2_1_disagreements),
             "n_v2_v2_1_disagreement": len(v2_v2_1_disagreements),
+            "n_v2_1_v3_disagreement": len(v2_1_v3_disagreements),
             "connected_rate": (sum(bool(x["connected"]) for x in usable) / len(usable)) if usable else None,
             "exact_alignment_connected_rate": (sum(bool(x["connected"]) for x in exact) / len(exact)) if exact else None,
             "box_intersection_v1_connected_rate": (

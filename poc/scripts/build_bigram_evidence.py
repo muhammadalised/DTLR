@@ -25,7 +25,7 @@ def main() -> int:
     scores = aggregate(rows)
     write_evidence(scores, args.output_dir / "bigram_scores.csv", args.output_dir / "bigram_scores.json")
     manifest = {
-        "schema_version": "dtlr.export-manifest.v3",
+        "schema_version": "dtlr.export-manifest.v4",
         "source": str(args.detections),
         "datasets": sorted({r["dataset"] for r in records}),
         "splits": sorted({r["split"] for r in records}),
@@ -33,8 +33,10 @@ def main() -> int:
         "evidence_count": len(rows),
         "score_count": len(scores),
         "aggregation_keys": ["dataset", "split", "pair"],
-        "primary_connectivity_method": "exclusive-core-v2.1",
-        "retained_comparison_methods": ["box-intersection-v1", "exclusive-core-v2"],
+        "primary_connectivity_method": "dominant-core-v3",
+        "retained_comparison_methods": [
+            "box-intersection-v1", "exclusive-core-v2", "exclusive-core-v2.1"
+        ],
         "v1_v2_1_disagreement_count": sum(
             row["usable"]
             and row["connected_box_intersection_v1"] != row["connected_exclusive_core_v2_1"]
@@ -45,8 +47,16 @@ def main() -> int:
             and row["connected_exclusive_core_v2"] != row["connected_exclusive_core_v2_1"]
             for row in rows
         ),
+        "v2_1_v3_disagreement_count": sum(
+            row["usable"]
+            and row["connected_exclusive_core_v2_1"] != row["connected_dominant_core_v3"]
+            for row in rows
+        ),
         "exclusive_core_unusable_count": sum(
             row["alignment_usable"] and not row["exclusive_core_usable"] for row in rows
+        ),
+        "dominant_core_unusable_count": sum(
+            row["alignment_usable"] and not row["dominant_core_usable"] for row in rows
         ),
         "note": "Scores remain split-specific; TVA must not fit thresholds on held-out splits.",
     }

@@ -54,11 +54,12 @@ class QARendererTests(unittest.TestCase):
             pair = manifest["lines"][0]["pairs"][0]
             self.assertEqual(manifest["pair_count"], 1)
             self.assertEqual(manifest["usable_pair_count"], 1)
-            self.assertEqual(manifest["primary_connectivity_method"], "exclusive-core-v2.1")
+            self.assertEqual(manifest["primary_connectivity_method"], "dominant-core-v3")
             self.assertTrue(pair["connected"])
             self.assertTrue(pair["connected_box_intersection_v1"])
             self.assertTrue(pair["connected_exclusive_core_v2"])
             self.assertTrue(pair["connected_exclusive_core_v2_1"])
+            self.assertTrue(pair["connected_dominant_core_v3"])
             self.assertEqual(pair["shared_component_count"], 1)
             self.assertTrue((output / pair["image"]).is_file())
             self.assertIn("IAM pair-level QA", (output / "index.html").read_text(encoding="utf-8"))

@@ -18,13 +18,15 @@ whitespace are excluded).
   provenance: visual QA showed false positives when one character's ink entered
   the overlap between adjacent boxes. Float-based `exclusive-core-v2` is also
   retained as rejected provenance because outward pixel rounding could
-  reintroduce a one-column overlap. The primary `exclusive-core-v2.1` method
-  removes horizontal box overlap and rounds the facing core boundaries inward,
-  then marks a pair `connected` only when one component intersects both
-  raster-disjoint cores. Pairs without ink in both cores are unusable. This
-  revised operational definition still requires validation on non-test data
-  before it is treated as a handwriting boundary label. The observed failures
-  and method changes are
+  reintroduce a one-column overlap. Raster-safe `exclusive-core-v2.1` is also
+  retained as rejected provenance because a component from one character can
+  extend into both disjoint cores while a different component dominates the
+  neighboring character. The primary `dominant-core-v3` method marks a pair
+  `connected` only when the same CCL component has the unique largest pixel
+  support in both raster-safe cores. Empty cores and tied largest components are
+  unusable. This parameter-free candidate still requires validation on non-test
+  data before it is treated as a handwriting boundary label. The observed
+  failures and method changes are
   recorded in
   [`provenance/connectivity-method-change-2026-08-21.md`](provenance/connectivity-method-change-2026-08-21.md).
 - Aggregates are keyed by dataset **and split**. Do not pool train/validation/test
@@ -83,23 +85,23 @@ python poc/scripts/export_iam_detections.py \
 python poc/scripts/build_bigram_evidence.py \
   --detections "${DTLR_OUTPUT_ROOT}/iam-test-small/detections.jsonl" \
   --data-root "${DTLR_DATA_ROOT}" \
-  --output-dir "${DTLR_OUTPUT_ROOT}/iam-test-small/bigrams-exclusive-core-v2-1"
+  --output-dir "${DTLR_OUTPUT_ROOT}/iam-test-small/bigrams-dominant-core-v3"
 
 python poc/scripts/render_iam_qa.py \
   --detections "${DTLR_OUTPUT_ROOT}/iam-test-small/detections.jsonl" \
   --data-root "${DTLR_DATA_ROOT}" \
-  --output-dir "${DTLR_OUTPUT_ROOT}/iam-test-small/qa-exclusive-core-v2-1"
+  --output-dir "${DTLR_OUTPUT_ROOT}/iam-test-small/qa-dominant-core-v3"
 ```
 
 The second command writes row-level evidence and split-specific aggregates in
 both CSV and JSON, plus a manifest. The third command writes one side-by-side
 box/alignment and CCL overview per line, enlarged pair-level crops under
 `qa/pairs/`, a browser-friendly `qa/index.html`, and a `qa_manifest.json`. In a
-connected pair crop the exact component spanning both exclusive cores is
-magenta. For a disconnected pair, components intersecting only the left core are
-blue and those intersecting only the right core are orange; box overlap is
-omitted and unrelated ink is gray. The rejected `core-v2` and `box-v1` results
-remain visible for comparison. Before scaling up,
+connected pair crop the component dominant in both exclusive cores is magenta.
+For a disconnected pair, the component dominant in the left core is blue and
+the component dominant in the right core is orange; unrelated ink is gray. The
+rejected `core-v2.1`, `core-v2`, and `box-v1` results remain visible for
+comparison. Before scaling up,
 manually inspect the crops and record an acceptance decision. This
 visualization/acceptance step remains an explicit milestone gate; the tooling
 deliberately does not silently invent acceptance criteria.

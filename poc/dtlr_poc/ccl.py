@@ -66,6 +66,29 @@ def component_ids_in_box(labels: np.ndarray, box_xyxy: list[float]) -> set[int]:
     return ids
 
 
+def component_pixel_counts_in_box(
+    labels: np.ndarray, box_xyxy: list[float]
+) -> dict[int, int]:
+    """Count pixels from each non-background component inside a box."""
+    height, width = labels.shape
+    x0, y0, x1, y1 = box_xyxy
+    left, top = max(0, int(np.floor(x0))), max(0, int(np.floor(y0)))
+    right, bottom = min(width, int(np.ceil(x1))), min(height, int(np.ceil(y1)))
+    if right <= left or bottom <= top:
+        return {}
+    ids, counts = np.unique(labels[top:bottom, left:right], return_counts=True)
+    return {int(component): int(count) for component, count in zip(ids, counts) if component != 0}
+
+
+def unique_dominant_component(counts: dict[int, int]) -> int | None:
+    """Return the unique largest component, or None for empty/tied support."""
+    if not counts:
+        return None
+    largest = max(counts.values())
+    winners = [component for component, count in counts.items() if count == largest]
+    return winners[0] if len(winners) == 1 else None
+
+
 def exclusive_core_boxes_v2(
     left_box: list[float], right_box: list[float]
 ) -> tuple[list[float], list[float]]:
@@ -97,9 +120,9 @@ def pair_component_evidence(
 ) -> dict:
     """Compare rejected full-box connectivity with exclusive-core connectivity.
 
-    Full-box intersection and the float-core v2 result are retained as rejected
-    provenance. The v2.1 candidate uses inward-rounded core boundaries so the
-    rasterized regions cannot regain a shared pixel column.
+    Earlier region-intersection results are retained as rejected provenance. The
+    v3 candidate requires the same component to have unique largest pixel
+    support in both raster-safe character cores.
     """
     left_full = component_ids_in_box(labels, left_box)
     right_full = component_ids_in_box(labels, right_box)
@@ -114,6 +137,11 @@ def pair_component_evidence(
     right_core = component_ids_in_box(labels, right_core_box)
     shared_core = left_core & right_core
     core_usable = bool(left_core) and bool(right_core)
+    left_core_counts = component_pixel_counts_in_box(labels, left_core_box)
+    right_core_counts = component_pixel_counts_in_box(labels, right_core_box)
+    left_dominant = unique_dominant_component(left_core_counts)
+    right_dominant = unique_dominant_component(right_core_counts)
+    dominant_usable = left_dominant is not None and right_dominant is not None
     return {
         "left_full_components": left_full,
         "right_full_components": right_full,
@@ -130,7 +158,23 @@ def pair_component_evidence(
         "right_core_components": right_core,
         "shared_core_components": shared_core,
         "exclusive_core_usable": core_usable,
+        "left_core_component_pixel_counts": left_core_counts,
+        "right_core_component_pixel_counts": right_core_counts,
+        "left_dominant_component": left_dominant,
+        "right_dominant_component": right_dominant,
+        "left_dominant_share": (
+            left_core_counts[left_dominant] / sum(left_core_counts.values())
+            if left_dominant is not None else None
+        ),
+        "right_dominant_share": (
+            right_core_counts[right_dominant] / sum(right_core_counts.values())
+            if right_dominant is not None else None
+        ),
+        "dominant_core_usable": dominant_usable,
         "connected_box_intersection_v1": bool(shared_full),
         "connected_exclusive_core_v2": bool(shared_core_v2) if core_usable_v2 else None,
         "connected_exclusive_core_v2_1": bool(shared_core) if core_usable else None,
+        "connected_dominant_core_v3": (
+            left_dominant == right_dominant if dominant_usable else None
+        ),
     }
