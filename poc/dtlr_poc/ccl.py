@@ -66,13 +66,30 @@ def component_ids_in_box(labels: np.ndarray, box_xyxy: list[float]) -> set[int]:
     return ids
 
 
-def exclusive_core_boxes(
+def exclusive_core_boxes_v2(
     left_box: list[float], right_box: list[float]
 ) -> tuple[list[float], list[float]]:
-    """Exclude horizontal box overlap from both adjacent character regions."""
+    """Original float-core definition retained to reproduce v2 outputs."""
     lx0, ly0, lx1, ly1 = left_box
     rx0, ry0, rx1, ry1 = right_box
     return [lx0, ly0, min(lx1, rx0), ly1], [max(rx0, lx1), ry0, rx1, ry1]
+
+
+def raster_safe_exclusive_core_boxes(
+    left_box: list[float], right_box: list[float]
+) -> tuple[list[float], list[float]]:
+    """Return cores whose integer pixel slices cannot overlap.
+
+    Full boxes are rasterized outward elsewhere. Core-facing boundaries must be
+    rasterized inward: floor the left core's right edge and ceil the right
+    core's left edge. Otherwise distinct fractional boundaries can both include
+    the same pixel column.
+    """
+    lx0, ly0, lx1, ly1 = left_box
+    rx0, ry0, rx1, ry1 = right_box
+    left_inner_edge = int(np.floor(min(lx1, rx0)))
+    right_inner_edge = int(np.ceil(max(rx0, lx1)))
+    return [lx0, ly0, left_inner_edge, ly1], [right_inner_edge, ry0, rx1, ry1]
 
 
 def pair_component_evidence(
@@ -80,14 +97,19 @@ def pair_component_evidence(
 ) -> dict:
     """Compare rejected full-box connectivity with exclusive-core connectivity.
 
-    Full-box intersection is retained as v1 provenance. The v2 candidate removes
-    the horizontal overlap from both boxes before testing whether one component
-    reaches ink confidently localized to both characters.
+    Full-box intersection and the float-core v2 result are retained as rejected
+    provenance. The v2.1 candidate uses inward-rounded core boundaries so the
+    rasterized regions cannot regain a shared pixel column.
     """
     left_full = component_ids_in_box(labels, left_box)
     right_full = component_ids_in_box(labels, right_box)
     shared_full = left_full & right_full
-    left_core_box, right_core_box = exclusive_core_boxes(left_box, right_box)
+    left_core_box_v2, right_core_box_v2 = exclusive_core_boxes_v2(left_box, right_box)
+    left_core_v2 = component_ids_in_box(labels, left_core_box_v2)
+    right_core_v2 = component_ids_in_box(labels, right_core_box_v2)
+    shared_core_v2 = left_core_v2 & right_core_v2
+    core_usable_v2 = bool(left_core_v2) and bool(right_core_v2)
+    left_core_box, right_core_box = raster_safe_exclusive_core_boxes(left_box, right_box)
     left_core = component_ids_in_box(labels, left_core_box)
     right_core = component_ids_in_box(labels, right_core_box)
     shared_core = left_core & right_core
@@ -96,6 +118,12 @@ def pair_component_evidence(
         "left_full_components": left_full,
         "right_full_components": right_full,
         "shared_full_components": shared_full,
+        "left_core_box_v2": left_core_box_v2,
+        "right_core_box_v2": right_core_box_v2,
+        "left_core_components_v2": left_core_v2,
+        "right_core_components_v2": right_core_v2,
+        "shared_core_components_v2": shared_core_v2,
+        "exclusive_core_usable_v2": core_usable_v2,
         "left_core_box": left_core_box,
         "right_core_box": right_core_box,
         "left_core_components": left_core,
@@ -103,5 +131,6 @@ def pair_component_evidence(
         "shared_core_components": shared_core,
         "exclusive_core_usable": core_usable,
         "connected_box_intersection_v1": bool(shared_full),
-        "connected_exclusive_core_v2": bool(shared_core) if core_usable else None,
+        "connected_exclusive_core_v2": bool(shared_core_v2) if core_usable_v2 else None,
+        "connected_exclusive_core_v2_1": bool(shared_core) if core_usable else None,
     }

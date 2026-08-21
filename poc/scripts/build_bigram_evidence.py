@@ -25,7 +25,7 @@ def main() -> int:
     scores = aggregate(rows)
     write_evidence(scores, args.output_dir / "bigram_scores.csv", args.output_dir / "bigram_scores.json")
     manifest = {
-        "schema_version": "dtlr.export-manifest.v2",
+        "schema_version": "dtlr.export-manifest.v3",
         "source": str(args.detections),
         "datasets": sorted({r["dataset"] for r in records}),
         "splits": sorted({r["split"] for r in records}),
@@ -33,11 +33,16 @@ def main() -> int:
         "evidence_count": len(rows),
         "score_count": len(scores),
         "aggregation_keys": ["dataset", "split", "pair"],
-        "primary_connectivity_method": "exclusive-core-v2",
-        "retained_comparison_method": "box-intersection-v1",
-        "v1_v2_disagreement_count": sum(
+        "primary_connectivity_method": "exclusive-core-v2.1",
+        "retained_comparison_methods": ["box-intersection-v1", "exclusive-core-v2"],
+        "v1_v2_1_disagreement_count": sum(
             row["usable"]
-            and row["connected_box_intersection_v1"] != row["connected_exclusive_core_v2"]
+            and row["connected_box_intersection_v1"] != row["connected_exclusive_core_v2_1"]
+            for row in rows
+        ),
+        "v2_v2_1_disagreement_count": sum(
+            row["usable"]
+            and row["connected_exclusive_core_v2"] != row["connected_exclusive_core_v2_1"]
             for row in rows
         ),
         "exclusive_core_unusable_count": sum(

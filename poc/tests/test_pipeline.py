@@ -6,7 +6,7 @@ import numpy as np
 from PIL import Image
 
 from dtlr_poc.alignment import align_monotonic, gt_detection_map
-from dtlr_poc.ccl import component_ids_in_box, label_ink
+from dtlr_poc.ccl import component_ids_in_box, label_ink, pair_component_evidence
 from dtlr_poc.evidence import aggregate, line_evidence
 
 
@@ -30,6 +30,21 @@ class CCLTests(unittest.TestCase):
         left = component_ids_in_box(labels, [0, 0, 5, 5])
         right = component_ids_in_box(labels, [4, 0, 8, 5])
         self.assertEqual(left & right, {1})
+
+    def test_raster_safe_cores_do_not_regain_fractional_overlap(self):
+        image = np.full((7, 11), 255, dtype=np.uint8)
+        image[3, 1:5] = 0
+        image[3, 6:10] = 0
+        labels, _ = label_ink(image, threshold=100)
+        result = pair_component_evidence(
+            labels,
+            [0.1, 0, 4.915, 7],
+            [4.882, 0, 9.9, 7],
+        )
+        self.assertTrue(result["connected_exclusive_core_v2"])
+        self.assertFalse(result["connected_exclusive_core_v2_1"])
+        self.assertEqual(result["left_core_box"][2], 4)
+        self.assertEqual(result["right_core_box"][0], 5)
 
 
 class AggregationTests(unittest.TestCase):
@@ -60,7 +75,7 @@ class AggregationTests(unittest.TestCase):
         self.assertEqual(row["pair"], "ab")
         self.assertEqual(row["right_alignment"], "substitute")
         self.assertTrue(row["connected"])
-        self.assertEqual(row["connectivity_method"], "exclusive-core-v2")
+        self.assertEqual(row["connectivity_method"], "exclusive-core-v2.1")
 
     def test_exclusive_cores_reject_overlap_false_positive(self):
         image = np.full((7, 12), 255, dtype=np.uint8)
@@ -83,6 +98,7 @@ class AggregationTests(unittest.TestCase):
         self.assertTrue(row["connected_box_intersection_v1"])
         self.assertTrue(row["exclusive_core_usable"])
         self.assertFalse(row["connected_exclusive_core_v2"])
+        self.assertFalse(row["connected_exclusive_core_v2_1"])
         self.assertFalse(row["connected"])
         self.assertEqual(row["left_exclusive_core_xyxy"], [0, 0, 4, 7])
         self.assertEqual(row["right_exclusive_core_xyxy"], [6, 0, 12, 7])
