@@ -74,13 +74,19 @@ python poc/scripts/build_bigram_evidence.py \
   --detections "${DTLR_OUTPUT_ROOT}/iam-test-small/detections.jsonl" \
   --data-root "${DTLR_DATA_ROOT}" \
   --output-dir "${DTLR_OUTPUT_ROOT}/iam-test-small/bigrams"
+
+python poc/scripts/render_iam_qa.py \
+  --detections "${DTLR_OUTPUT_ROOT}/iam-test-small/detections.jsonl" \
+  --data-root "${DTLR_DATA_ROOT}" \
+  --output-dir "${DTLR_OUTPUT_ROOT}/iam-test-small/qa"
 ```
 
 The second command writes row-level evidence and split-specific aggregates in
-both CSV and JSON, plus a manifest. Before scaling up, inspect box overlays and
-CCL assignments for the eight lines. That visualization/acceptance step remains
-an explicit milestone gate; the current exporter deliberately does not silently
-invent acceptance criteria.
+both CSV and JSON, plus a manifest. The third command writes one side-by-side
+box/alignment and CCL overlay per line plus a `qa_manifest.json`. Before scaling
+up, manually inspect all eight overlays and record an acceptance decision. This
+visualization/acceptance step remains an explicit milestone gate; the tooling
+deliberately does not silently invent acceptance criteria.
 
 ## Local tests (no CUDA required)
 
