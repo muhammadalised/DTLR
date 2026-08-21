@@ -83,8 +83,12 @@ python poc/scripts/render_iam_qa.py \
 
 The second command writes row-level evidence and split-specific aggregates in
 both CSV and JSON, plus a manifest. The third command writes one side-by-side
-box/alignment and CCL overlay per line plus a `qa_manifest.json`. Before scaling
-up, manually inspect all eight overlays and record an acceptance decision. This
+box/alignment and CCL overview per line, enlarged pair-level crops under
+`qa/pairs/`, a browser-friendly `qa/index.html`, and a `qa_manifest.json`. In a
+connected pair crop the exact shared component is magenta. For a disconnected
+pair, components intersecting only the left box are blue and those intersecting
+only the right box are orange; unrelated ink is gray. Before scaling up,
+manually inspect the crops and record an acceptance decision. This
 visualization/acceptance step remains an explicit milestone gate; the tooling
 deliberately does not silently invent acceptance criteria.
 

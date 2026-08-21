@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Render side-by-side DTLR alignment and CCL overlays for manual QA."""
 import argparse
+import html
 import json
 import sys
 from collections import Counter
@@ -38,6 +39,162 @@ def add_header(image: Image.Image, text: str, height: int = 42) -> Image.Image:
 def shifted_box(box: list[float], y_offset: int) -> tuple[int, int, int, int]:
     x0, y0, x1, y1 = box
     return round(x0), round(y0) + y_offset, round(x1), round(y1) + y_offset
+
+
+def diagnostic_component_image(
+    gray: np.ndarray,
+    labels: np.ndarray,
+    left_components: set[int],
+    right_components: set[int],
+) -> Image.Image:
+    """Dim unrelated ink and highlight the components relevant to one pair."""
+    rgb = np.full((*gray.shape, 3), 255, dtype=np.uint8)
+    rgb[labels > 0] = (205, 205, 205)
+    shared = left_components & right_components
+    if shared:
+        rgb[np.isin(labels, list(shared))] = (210, 0, 145)
+    else:
+        rgb[np.isin(labels, list(left_components))] = (0, 119, 187)
+        rgb[np.isin(labels, list(right_components))] = (238, 119, 51)
+    return Image.fromarray(rgb, mode="RGB")
+
+
+def render_pair_crops(
+    record: dict,
+    data_root: Path,
+    output_dir: Path,
+    fixed_threshold: int | None,
+) -> list[dict]:
+    image_path = data_root / record["image_relpath"]
+    original = Image.open(image_path).convert("RGB")
+    gray = np.asarray(original.convert("L"))
+    threshold = otsu_threshold(gray) if fixed_threshold is None else fixed_threshold
+    labels, _ = label_ink(gray, threshold)
+    detections = sorted(record["detections"], key=lambda item: item["box_xyxy"][0])
+    mapping = gt_detection_map(record["transcription"], [item["predicted_char"] for item in detections])
+    line_dir = output_dir / "pairs" / record["line_id"]
+    line_dir.mkdir(parents=True, exist_ok=True)
+    results = []
+
+    for left_index in range(len(record["transcription"]) - 1):
+        right_index = left_index + 1
+        left_char = record["transcription"][left_index]
+        right_char = record["transcription"][right_index]
+        if left_char.isspace() or right_char.isspace():
+            continue
+        left_alignment, right_alignment = mapping[left_index], mapping[right_index]
+        item = {
+            "left_gt_index": left_index,
+            "right_gt_index": right_index,
+            "pair": left_char + right_char,
+            "left_alignment": left_alignment.operation,
+            "right_alignment": right_alignment.operation,
+            "usable": False,
+            "connected": None,
+            "shared_component_count": None,
+            "image": None,
+        }
+        if left_alignment.detection_index is None or right_alignment.detection_index is None:
+            results.append(item)
+            continue
+
+        left_box = detections[left_alignment.detection_index]["box_xyxy"]
+        right_box = detections[right_alignment.detection_index]["box_xyxy"]
+        left_components = component_ids_in_box(labels, left_box)
+        right_components = component_ids_in_box(labels, right_box)
+        shared = left_components & right_components
+        pad = 12
+        crop_left = max(0, int(np.floor(min(left_box[0], right_box[0]))) - pad)
+        crop_top = max(0, int(np.floor(min(left_box[1], right_box[1]))) - pad)
+        crop_right = min(original.width, int(np.ceil(max(left_box[2], right_box[2]))) + pad)
+        crop_bottom = min(original.height, int(np.ceil(max(left_box[3], right_box[3]))) + pad)
+        crop_bounds = (crop_left, crop_top, crop_right, crop_bottom)
+        original_crop = original.crop(crop_bounds)
+        diagnostic = diagnostic_component_image(gray, labels, left_components, right_components).crop(crop_bounds)
+
+        header = 48
+        panel_width = max(320, original_crop.width)
+        canvas = Image.new("RGB", (panel_width * 2, original_crop.height + header), "white")
+        left_offset = (panel_width - original_crop.width) // 2
+        right_offset = panel_width + (panel_width - diagnostic.width) // 2
+        canvas.paste(original_crop, (left_offset, header))
+        canvas.paste(diagnostic, (right_offset, header))
+        draw = ImageDraw.Draw(canvas)
+        title = (
+            f"{record['line_id']} [{left_index}:{right_index}] {left_char + right_char!r}  "
+            f"{left_alignment.operation}/{right_alignment.operation}  "
+            f"connected={bool(shared)} shared={len(shared)}"
+        )
+        draw.text((6, 4), title, fill="black")
+        draw.text((6, 22), "original: left=blue, right=orange", fill="black")
+        draw.text((panel_width + 6, 22), "magenta=shared; otherwise blue=left, orange=right", fill="black")
+        for panel_offset in (left_offset, right_offset):
+            translated_left = (
+                round(left_box[0]) - crop_left + panel_offset,
+                round(left_box[1]) - crop_top + header,
+                round(left_box[2]) - crop_left + panel_offset,
+                round(left_box[3]) - crop_top + header,
+            )
+            translated_right = (
+                round(right_box[0]) - crop_left + panel_offset,
+                round(right_box[1]) - crop_top + header,
+                round(right_box[2]) - crop_left + panel_offset,
+                round(right_box[3]) - crop_top + header,
+            )
+            draw.rectangle(translated_left, outline="#0077bb", width=2)
+            draw.rectangle(translated_right, outline="#ee7733", width=2)
+
+        filename = f"pair_{left_index:04d}.png"
+        canvas.save(line_dir / filename)
+        item.update({
+            "usable": True,
+            "connected": bool(shared),
+            "shared_component_count": len(shared),
+            "left_component_count": len(left_components),
+            "right_component_count": len(right_components),
+            "image": str(Path("pairs") / record["line_id"] / filename),
+        })
+        results.append(item)
+    return results
+
+
+def write_review_index(lines: list[dict], output: Path) -> None:
+    sections = []
+    for line in lines:
+        cards = []
+        for pair in line["pairs"]:
+            state = "unusable" if not pair["usable"] else "connected" if pair["connected"] else "disconnected"
+            image = (
+                f'<a href="{html.escape(pair["image"])}"><img loading="lazy" src="{html.escape(pair["image"])}"></a>'
+                if pair["image"] else "<p>No pair image: one or both detections are missing.</p>"
+            )
+            cards.append(
+                f'<article class="{state}"><h3>{pair["left_gt_index"]}: '
+                f'{html.escape(pair["pair"])} — {state}</h3>{image}</article>'
+            )
+        sections.append(
+            f'<details><summary>{html.escape(line["line_id"])} — '
+            f'{len(line["pairs"])} pairs</summary>{"".join(cards)}</details>'
+        )
+    document = f"""<!doctype html>
+<meta charset="utf-8">
+<title>IAM pair-level QA</title>
+<style>
+body {{ font: 14px system-ui, sans-serif; margin: 20px; }}
+summary {{ cursor: pointer; font-size: 18px; font-weight: 600; margin: 12px 0; }}
+article {{ border-left: 5px solid #888; margin: 12px 0; padding: 4px 10px; }}
+article.connected {{ border-color: #b00078; }}
+article.disconnected {{ border-color: #666; }}
+article.unusable {{ border-color: #d88900; }}
+h3 {{ margin: 3px 0; }}
+img {{ width: min(100%, 960px); image-rendering: auto; }}
+</style>
+<h1>IAM pair-level QA</h1>
+<p>Magenta is the exact component intersecting both boxes. When disconnected,
+blue components intersect only the left box and orange components only the right.</p>
+{"".join(sections)}
+"""
+    output.write_text(document, encoding="utf-8")
 
 
 def render_record(record: dict, data_root: Path, output: Path, fixed_threshold: int | None) -> dict:
@@ -118,16 +275,26 @@ def main() -> int:
     args = parser.parse_args()
     records = [json.loads(line) for line in args.detections.read_text(encoding="utf-8").splitlines() if line]
     args.output_dir.mkdir(parents=True, exist_ok=True)
-    lines = [
-        render_record(record, args.data_root, args.output_dir / f"{record['line_id']}.qa.png", args.ink_threshold)
-        for record in records
-    ]
+    lines = []
+    for record in records:
+        line = render_record(
+            record,
+            args.data_root,
+            args.output_dir / f"{record['line_id']}.qa.png",
+            args.ink_threshold,
+        )
+        line["pairs"] = render_pair_crops(record, args.data_root, args.output_dir, args.ink_threshold)
+        lines.append(line)
+    write_review_index(lines, args.output_dir / "index.html")
     manifest = {
         "schema_version": "dtlr.qa-manifest.v1",
         "source": str(args.detections),
         "line_count": len(lines),
+        "pair_count": sum(len(line["pairs"]) for line in lines),
+        "usable_pair_count": sum(pair["usable"] for line in lines for pair in line["pairs"]),
         "ink_threshold": args.ink_threshold if args.ink_threshold is not None else "otsu-per-line",
         "status": "pending-manual-review",
+        "review_index": "index.html",
         "lines": lines,
     }
     (args.output_dir / "qa_manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
