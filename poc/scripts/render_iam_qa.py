@@ -41,6 +41,12 @@ def shifted_box(box: list[float], y_offset: int) -> tuple[int, int, int, int]:
     return round(x0), round(y0) + y_offset, round(x1), round(y1) + y_offset
 
 
+def valid_box_geometry(box: list[float]) -> bool:
+    """Return whether a box can be drawn without changing its geometry."""
+    x0, y0, x1, y1 = box
+    return bool(np.all(np.isfinite(box)) and x1 >= x0 and y1 >= y0)
+
+
 def diagnostic_component_image(
     gray: np.ndarray,
     labels: np.ndarray,
@@ -149,11 +155,20 @@ def render_pair_crops(
         draw.text((6, 4), title, fill="black")
         draw.text((6, 22), "original: complete DTLR boxes", fill="black")
         draw.text((panel_width + 6, 22), "diagnostic: unique dominant core components", fill="black")
-        for panel_offset, boxes in (
-            (left_offset, (left_box, right_box)),
-            (right_offset, (component_evidence["left_core_box"], component_evidence["right_core_box"])),
+        core_boxes_drawable = []
+        for panel_offset, boxes, is_core_panel in (
+            (left_offset, (left_box, right_box), False),
+            (right_offset, (component_evidence["left_core_box"], component_evidence["right_core_box"]), True),
         ):
             for box, color in zip(boxes, ("#0077bb", "#ee7733")):
+                drawable = valid_box_geometry(box)
+                if is_core_panel:
+                    core_boxes_drawable.append(drawable)
+                if not drawable:
+                    # An inverted exclusive core is an empty region, not a box
+                    # to normalize. CCL already marks it unusable; omit only
+                    # the invalid outline and retain the original coordinates.
+                    continue
                 translated = (
                     round(box[0]) - crop_left + panel_offset,
                     round(box[1]) - crop_top + header,
@@ -195,6 +210,7 @@ def render_pair_crops(
             "right_exclusive_core_v2_xyxy": component_evidence["right_core_box_v2"],
             "left_exclusive_core_xyxy": component_evidence["left_core_box"],
             "right_exclusive_core_xyxy": component_evidence["right_core_box"],
+            "exclusive_core_geometry_valid": all(core_boxes_drawable),
             "image": str(Path("pairs") / record["line_id"] / filename),
         })
         results.append(item)
@@ -344,7 +360,7 @@ def main() -> int:
         lines.append(line)
     write_review_index(lines, args.output_dir / "index.html")
     manifest = {
-        "schema_version": "dtlr.qa-manifest.v4",
+        "schema_version": "dtlr.qa-manifest.v5",
         "source": str(args.detections),
         "line_count": len(lines),
         "pair_count": sum(len(line["pairs"]) for line in lines),
@@ -356,6 +372,10 @@ def main() -> int:
         "v2_1_v3_disagreement_count": sum(
             pair["usable"]
             and pair["connected_exclusive_core_v2_1"] != pair["connected_dominant_core_v3"]
+            for line in lines for pair in line["pairs"]
+        ),
+        "invalid_exclusive_core_geometry_count": sum(
+            pair.get("exclusive_core_geometry_valid") is False
             for line in lines for pair in line["pairs"]
         ),
         "ink_threshold": args.ink_threshold if args.ink_threshold is not None else "otsu-per-line",
