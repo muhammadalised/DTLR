@@ -25,7 +25,7 @@ def main() -> int:
     scores = aggregate(rows)
     write_evidence(scores, args.output_dir / "bigram_scores.csv", args.output_dir / "bigram_scores.json")
     manifest = {
-        "schema_version": "dtlr.export-manifest.v1",
+        "schema_version": "dtlr.export-manifest.v2",
         "source": str(args.detections),
         "datasets": sorted({r["dataset"] for r in records}),
         "splits": sorted({r["split"] for r in records}),
@@ -33,6 +33,16 @@ def main() -> int:
         "evidence_count": len(rows),
         "score_count": len(scores),
         "aggregation_keys": ["dataset", "split", "pair"],
+        "primary_connectivity_method": "exclusive-core-v2",
+        "retained_comparison_method": "box-intersection-v1",
+        "v1_v2_disagreement_count": sum(
+            row["usable"]
+            and row["connected_box_intersection_v1"] != row["connected_exclusive_core_v2"]
+            for row in rows
+        ),
+        "exclusive_core_unusable_count": sum(
+            row["alignment_usable"] and not row["exclusive_core_usable"] for row in rows
+        ),
         "note": "Scores remain split-specific; TVA must not fit thresholds on held-out splits.",
     }
     (args.output_dir / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")

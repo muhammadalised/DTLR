@@ -14,9 +14,16 @@ whitespace are excluded).
   aggregate scores are reported separately. Missing boxes make a pair unusable.
 - Dark pixels are binarized with Otsu's threshold (or an explicitly recorded
   fixed threshold) and labelled with 8-connectivity.
-- A pair is `connected` when one physical ink component intersects both aligned
-  character boxes. This operational definition must be validated visually before
-  it is treated as a handwriting boundary label.
+- Full-box intersection (`box-intersection-v1`) is retained only as rejected
+  provenance: visual QA showed false positives when one character's ink entered
+  the overlap between adjacent boxes. The primary `exclusive-core-v2` method
+  removes horizontal box overlap from both character regions, then marks a pair
+  `connected` only when one component intersects both non-overlapping cores.
+  Pairs without ink in both cores are unusable. This revised operational
+  definition still requires validation on non-test data before it is treated as
+  a handwriting boundary label. The observed failure and method change are
+  recorded in
+  [`provenance/connectivity-method-change-2026-08-21.md`](provenance/connectivity-method-change-2026-08-21.md).
 - Aggregates are keyed by dataset **and split**. Do not pool train/validation/test
   evidence or tune TVA using held-out IAM evidence.
 
@@ -73,21 +80,23 @@ python poc/scripts/export_iam_detections.py \
 python poc/scripts/build_bigram_evidence.py \
   --detections "${DTLR_OUTPUT_ROOT}/iam-test-small/detections.jsonl" \
   --data-root "${DTLR_DATA_ROOT}" \
-  --output-dir "${DTLR_OUTPUT_ROOT}/iam-test-small/bigrams"
+  --output-dir "${DTLR_OUTPUT_ROOT}/iam-test-small/bigrams-exclusive-core-v2"
 
 python poc/scripts/render_iam_qa.py \
   --detections "${DTLR_OUTPUT_ROOT}/iam-test-small/detections.jsonl" \
   --data-root "${DTLR_DATA_ROOT}" \
-  --output-dir "${DTLR_OUTPUT_ROOT}/iam-test-small/qa"
+  --output-dir "${DTLR_OUTPUT_ROOT}/iam-test-small/qa-exclusive-core-v2"
 ```
 
 The second command writes row-level evidence and split-specific aggregates in
 both CSV and JSON, plus a manifest. The third command writes one side-by-side
 box/alignment and CCL overview per line, enlarged pair-level crops under
 `qa/pairs/`, a browser-friendly `qa/index.html`, and a `qa_manifest.json`. In a
-connected pair crop the exact shared component is magenta. For a disconnected
-pair, components intersecting only the left box are blue and those intersecting
-only the right box are orange; unrelated ink is gray. Before scaling up,
+connected pair crop the exact component spanning both exclusive cores is
+magenta. For a disconnected pair, components intersecting only the left core are
+blue and those intersecting only the right core are orange; box overlap is
+omitted and unrelated ink is gray. The rejected full-box result remains visible
+as `box-v1` for comparison. Before scaling up,
 manually inspect the crops and record an acceptance decision. This
 visualization/acceptance step remains an explicit milestone gate; the tooling
 deliberately does not silently invent acceptance criteria.

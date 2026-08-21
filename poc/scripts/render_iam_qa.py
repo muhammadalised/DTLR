@@ -14,7 +14,7 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "poc"))
 
 from dtlr_poc.alignment import gt_detection_map  # noqa: E402
-from dtlr_poc.ccl import component_ids_in_box, label_ink, otsu_threshold  # noqa: E402
+from dtlr_poc.ccl import label_ink, otsu_threshold, pair_component_evidence  # noqa: E402
 
 
 def component_image(gray: np.ndarray, labels: np.ndarray) -> Image.Image:
@@ -89,9 +89,12 @@ def render_pair_crops(
             "pair": left_char + right_char,
             "left_alignment": left_alignment.operation,
             "right_alignment": right_alignment.operation,
+            "connectivity_method": "exclusive-core-v2",
             "usable": False,
             "connected": None,
             "shared_component_count": None,
+            "connected_box_intersection_v1": None,
+            "connected_exclusive_core_v2": None,
             "image": None,
         }
         if left_alignment.detection_index is None or right_alignment.detection_index is None:
@@ -100,9 +103,11 @@ def render_pair_crops(
 
         left_box = detections[left_alignment.detection_index]["box_xyxy"]
         right_box = detections[right_alignment.detection_index]["box_xyxy"]
-        left_components = component_ids_in_box(labels, left_box)
-        right_components = component_ids_in_box(labels, right_box)
-        shared = left_components & right_components
+        component_evidence = pair_component_evidence(labels, left_box, right_box)
+        left_components = component_evidence["left_core_components"]
+        right_components = component_evidence["right_core_components"]
+        shared = component_evidence["shared_core_components"]
+        core_usable = component_evidence["exclusive_core_usable"]
         pad = 12
         crop_left = max(0, int(np.floor(min(left_box[0], right_box[0]))) - pad)
         crop_top = max(0, int(np.floor(min(left_box[1], right_box[1]))) - pad)
@@ -123,35 +128,40 @@ def render_pair_crops(
         title = (
             f"{record['line_id']} [{left_index}:{right_index}] {left_char + right_char!r}  "
             f"{left_alignment.operation}/{right_alignment.operation}  "
-            f"connected={bool(shared)} shared={len(shared)}"
+            f"core-v2={component_evidence['connected_exclusive_core_v2']} "
+            f"box-v1={component_evidence['connected_box_intersection_v1']} shared={len(shared)}"
         )
         draw.text((6, 4), title, fill="black")
-        draw.text((6, 22), "original: left=blue, right=orange", fill="black")
-        draw.text((panel_width + 6, 22), "magenta=shared; otherwise blue=left, orange=right", fill="black")
-        for panel_offset in (left_offset, right_offset):
-            translated_left = (
-                round(left_box[0]) - crop_left + panel_offset,
-                round(left_box[1]) - crop_top + header,
-                round(left_box[2]) - crop_left + panel_offset,
-                round(left_box[3]) - crop_top + header,
-            )
-            translated_right = (
-                round(right_box[0]) - crop_left + panel_offset,
-                round(right_box[1]) - crop_top + header,
-                round(right_box[2]) - crop_left + panel_offset,
-                round(right_box[3]) - crop_top + header,
-            )
-            draw.rectangle(translated_left, outline="#0077bb", width=2)
-            draw.rectangle(translated_right, outline="#ee7733", width=2)
+        draw.text((6, 22), "original: complete DTLR boxes", fill="black")
+        draw.text((panel_width + 6, 22), "diagnostic: exclusive cores; overlap omitted", fill="black")
+        for panel_offset, boxes in (
+            (left_offset, (left_box, right_box)),
+            (right_offset, (component_evidence["left_core_box"], component_evidence["right_core_box"])),
+        ):
+            for box, color in zip(boxes, ("#0077bb", "#ee7733")):
+                translated = (
+                    round(box[0]) - crop_left + panel_offset,
+                    round(box[1]) - crop_top + header,
+                    round(box[2]) - crop_left + panel_offset,
+                    round(box[3]) - crop_top + header,
+                )
+                draw.rectangle(translated, outline=color, width=2)
 
         filename = f"pair_{left_index:04d}.png"
         canvas.save(line_dir / filename)
         item.update({
-            "usable": True,
-            "connected": bool(shared),
-            "shared_component_count": len(shared),
+            "usable": core_usable,
+            "connected": component_evidence["connected_exclusive_core_v2"],
+            "shared_component_count": len(shared) if core_usable else None,
+            "connected_box_intersection_v1": component_evidence["connected_box_intersection_v1"],
+            "connected_exclusive_core_v2": component_evidence["connected_exclusive_core_v2"],
+            "exclusive_core_usable": core_usable,
+            "shared_component_count_box_intersection_v1": len(component_evidence["shared_full_components"]),
+            "shared_component_count_exclusive_core_v2": len(shared) if core_usable else None,
             "left_component_count": len(left_components),
             "right_component_count": len(right_components),
+            "left_exclusive_core_xyxy": component_evidence["left_core_box"],
+            "right_exclusive_core_xyxy": component_evidence["right_core_box"],
             "image": str(Path("pairs") / record["line_id"] / filename),
         })
         results.append(item)
@@ -170,7 +180,8 @@ def write_review_index(lines: list[dict], output: Path) -> None:
             )
             cards.append(
                 f'<article class="{state}"><h3>{pair["left_gt_index"]}: '
-                f'{html.escape(pair["pair"])} — {state}</h3>{image}</article>'
+                f'{html.escape(pair["pair"])} — core-v2 {state}; '
+                f'box-v1={pair["connected_box_intersection_v1"]}</h3>{image}</article>'
             )
         sections.append(
             f'<details><summary>{html.escape(line["line_id"])} — '
@@ -190,8 +201,9 @@ h3 {{ margin: 3px 0; }}
 img {{ width: min(100%, 960px); image-rendering: auto; }}
 </style>
 <h1>IAM pair-level QA</h1>
-<p>Magenta is the exact component intersecting both boxes. When disconnected,
-blue components intersect only the left box and orange components only the right.</p>
+<p>The primary method is exclusive-core-v2. Magenta reaches both non-overlapping
+cores. When disconnected, blue reaches only the left core and orange only the
+right. The rejected full-box result is retained as box-v1 for comparison.</p>
 {"".join(sections)}
 """
     output.write_text(document, encoding="utf-8")
@@ -212,7 +224,7 @@ def render_record(record: dict, data_root: Path, output: Path, fixed_threshold: 
     }
 
     left = add_header(original, "Boxes: green=match, amber=substitution, blue=extra")
-    right = add_header(component_image(gray, labels), "CCL: green link=shared component, red link=not shared")
+    right = add_header(component_image(gray, labels), "CCL exclusive-core-v2: green=connected, red=disconnected")
     left_draw, right_draw = ImageDraw.Draw(left), ImageDraw.Draw(right)
     header = 42
     operation_counts = Counter(item.operation for item in mapping.values())
@@ -231,7 +243,7 @@ def render_record(record: dict, data_root: Path, output: Path, fixed_threshold: 
             label = f"-/{detection['predicted_char']} i"
         left_draw.text((box[0], max(header, box[1] - 11)), label, fill=color)
 
-    usable_pairs = connected_pairs = 0
+    aligned_pairs = usable_pairs = connected_pairs = disagreements = 0
     for gt_index in range(len(record["transcription"]) - 1):
         if record["transcription"][gt_index].isspace() or record["transcription"][gt_index + 1].isspace():
             continue
@@ -240,14 +252,21 @@ def render_record(record: dict, data_root: Path, output: Path, fixed_threshold: 
             continue
         first_box = detections[first.detection_index]["box_xyxy"]
         second_box = detections[second.detection_index]["box_xyxy"]
-        shared = component_ids_in_box(labels, first_box) & component_ids_in_box(labels, second_box)
+        component_evidence = pair_component_evidence(labels, first_box, second_box)
+        aligned_pairs += 1
+        if not component_evidence["exclusive_core_usable"]:
+            continue
+        connected = component_evidence["connected_exclusive_core_v2"]
         usable_pairs += 1
-        connected_pairs += bool(shared)
+        connected_pairs += bool(connected)
+        disagreements += (
+            component_evidence["connected_box_intersection_v1"] != connected
+        )
         x0 = round((first_box[0] + first_box[2]) / 2)
         y0 = round((first_box[1] + first_box[3]) / 2) + header
         x1 = round((second_box[0] + second_box[2]) / 2)
         y1 = round((second_box[1] + second_box[3]) / 2) + header
-        right_draw.line((x0, y0, x1, y1), fill="#00a02b" if shared else "#d02020", width=2)
+        right_draw.line((x0, y0, x1, y1), fill="#00a02b" if connected else "#d02020", width=2)
 
     combined = Image.new("RGB", (left.width + right.width, max(left.height, right.height)), "white")
     combined.paste(left, (0, 0))
@@ -261,8 +280,10 @@ def render_record(record: dict, data_root: Path, output: Path, fixed_threshold: 
         "alignment_operations": dict(sorted(operation_counts.items())),
         "ccl_threshold": threshold,
         "ccl_component_count": component_count,
+        "alignment_usable_pair_count": aligned_pairs,
         "usable_pair_count": usable_pairs,
         "connected_pair_count": connected_pairs,
+        "v1_v2_disagreement_count": disagreements,
     }
 
 
@@ -287,11 +308,18 @@ def main() -> int:
         lines.append(line)
     write_review_index(lines, args.output_dir / "index.html")
     manifest = {
-        "schema_version": "dtlr.qa-manifest.v1",
+        "schema_version": "dtlr.qa-manifest.v2",
         "source": str(args.detections),
         "line_count": len(lines),
         "pair_count": sum(len(line["pairs"]) for line in lines),
         "usable_pair_count": sum(pair["usable"] for line in lines for pair in line["pairs"]),
+        "primary_connectivity_method": "exclusive-core-v2",
+        "retained_comparison_method": "box-intersection-v1",
+        "v1_v2_disagreement_count": sum(
+            pair["usable"]
+            and pair["connected_box_intersection_v1"] != pair["connected_exclusive_core_v2"]
+            for line in lines for pair in line["pairs"]
+        ),
         "ink_threshold": args.ink_threshold if args.ink_threshold is not None else "otsu-per-line",
         "status": "pending-manual-review",
         "review_index": "index.html",

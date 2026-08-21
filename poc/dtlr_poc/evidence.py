@@ -7,10 +7,11 @@ import numpy as np
 from PIL import Image
 
 from .alignment import gt_detection_map
-from .ccl import component_ids_in_box, label_ink
+from .ccl import label_ink, pair_component_evidence
 
 
-SCHEMA_VERSION = "dtlr.bigram-evidence.v1"
+SCHEMA_VERSION = "dtlr.bigram-evidence.v2"
+CONNECTIVITY_METHOD = "exclusive-core-v2"
 
 
 def line_evidence(record: dict, data_root: Path, threshold: int | None = None) -> list[dict]:
@@ -39,23 +40,40 @@ def line_evidence(record: dict, data_root: Path, threshold: int | None = None) -
             "pair": left_char + right_char,
             "left_alignment": left_alignment.operation,
             "right_alignment": right_alignment.operation,
+            "connectivity_method": CONNECTIVITY_METHOD,
+            "alignment_usable": False,
             "usable": False,
             "connected": None,
             "shared_component_count": None,
+            "connected_box_intersection_v1": None,
+            "shared_component_count_box_intersection_v1": None,
+            "exclusive_core_usable": False,
+            "connected_exclusive_core_v2": None,
+            "shared_component_count_exclusive_core_v2": None,
             "ccl_component_count": component_count,
         }
         if left_alignment.detection_index is not None and right_alignment.detection_index is not None:
             left_box = detections[left_alignment.detection_index]["box_xyxy"]
             right_box = detections[right_alignment.detection_index]["box_xyxy"]
-            shared = component_ids_in_box(labels, left_box) & component_ids_in_box(labels, right_box)
+            component_evidence = pair_component_evidence(labels, left_box, right_box)
+            core_usable = component_evidence["exclusive_core_usable"]
+            shared_core = component_evidence["shared_core_components"]
             row.update({
-                "usable": True,
-                "connected": bool(shared),
-                "shared_component_count": len(shared),
+                "alignment_usable": True,
+                "usable": core_usable,
+                "connected": component_evidence["connected_exclusive_core_v2"],
+                "shared_component_count": len(shared_core) if core_usable else None,
+                "connected_box_intersection_v1": component_evidence["connected_box_intersection_v1"],
+                "shared_component_count_box_intersection_v1": len(component_evidence["shared_full_components"]),
+                "exclusive_core_usable": core_usable,
+                "connected_exclusive_core_v2": component_evidence["connected_exclusive_core_v2"],
+                "shared_component_count_exclusive_core_v2": len(shared_core) if core_usable else None,
                 "left_score": detections[left_alignment.detection_index]["score"],
                 "right_score": detections[right_alignment.detection_index]["score"],
                 "left_box_xyxy": left_box,
                 "right_box_xyxy": right_box,
+                "left_exclusive_core_xyxy": component_evidence["left_core_box"],
+                "right_exclusive_core_xyxy": component_evidence["right_core_box"],
             })
         rows.append(row)
     return rows
@@ -80,17 +98,30 @@ def aggregate(rows: list[dict]) -> list[dict]:
     for (dataset, split, pair), items in sorted(groups.items()):
         usable = [item for item in items if item["usable"]]
         exact = [item for item in usable if item["left_alignment"] == item["right_alignment"] == "match"]
+        v1_usable = [item for item in items if item.get("alignment_usable", item["usable"])]
+        disagreements = [
+            item for item in usable
+            if item.get("connected_box_intersection_v1", item["connected"])
+            != item.get("connected_exclusive_core_v2", item["connected"])
+        ]
         result.append({
-            "schema_version": "dtlr.bigram-scores.v1",
+            "schema_version": "dtlr.bigram-scores.v2",
             "dataset": dataset,
             "split": split,
             "pair": pair,
             "left_char": pair[0],
             "right_char": pair[1],
+            "connectivity_method": CONNECTIVITY_METHOD,
             "n_total": len(items),
+            "n_alignment_usable": len(v1_usable),
             "n_usable": len(usable),
             "n_exact_alignment": len(exact),
+            "n_v1_v2_disagreement": len(disagreements),
             "connected_rate": (sum(bool(x["connected"]) for x in usable) / len(usable)) if usable else None,
             "exact_alignment_connected_rate": (sum(bool(x["connected"]) for x in exact) / len(exact)) if exact else None,
+            "box_intersection_v1_connected_rate": (
+                sum(bool(x.get("connected_box_intersection_v1", x["connected"])) for x in v1_usable)
+                / len(v1_usable)
+            ) if v1_usable else None,
         })
     return result

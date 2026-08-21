@@ -64,3 +64,44 @@ def component_ids_in_box(labels: np.ndarray, box_xyxy: list[float]) -> set[int]:
     ids = set(np.unique(labels[top:bottom, left:right]).tolist())
     ids.discard(0)
     return ids
+
+
+def exclusive_core_boxes(
+    left_box: list[float], right_box: list[float]
+) -> tuple[list[float], list[float]]:
+    """Exclude horizontal box overlap from both adjacent character regions."""
+    lx0, ly0, lx1, ly1 = left_box
+    rx0, ry0, rx1, ry1 = right_box
+    return [lx0, ly0, min(lx1, rx0), ly1], [max(rx0, lx1), ry0, rx1, ry1]
+
+
+def pair_component_evidence(
+    labels: np.ndarray, left_box: list[float], right_box: list[float]
+) -> dict:
+    """Compare rejected full-box connectivity with exclusive-core connectivity.
+
+    Full-box intersection is retained as v1 provenance. The v2 candidate removes
+    the horizontal overlap from both boxes before testing whether one component
+    reaches ink confidently localized to both characters.
+    """
+    left_full = component_ids_in_box(labels, left_box)
+    right_full = component_ids_in_box(labels, right_box)
+    shared_full = left_full & right_full
+    left_core_box, right_core_box = exclusive_core_boxes(left_box, right_box)
+    left_core = component_ids_in_box(labels, left_core_box)
+    right_core = component_ids_in_box(labels, right_core_box)
+    shared_core = left_core & right_core
+    core_usable = bool(left_core) and bool(right_core)
+    return {
+        "left_full_components": left_full,
+        "right_full_components": right_full,
+        "shared_full_components": shared_full,
+        "left_core_box": left_core_box,
+        "right_core_box": right_core_box,
+        "left_core_components": left_core,
+        "right_core_components": right_core,
+        "shared_core_components": shared_core,
+        "exclusive_core_usable": core_usable,
+        "connected_box_intersection_v1": bool(shared_full),
+        "connected_exclusive_core_v2": bool(shared_core) if core_usable else None,
+    }

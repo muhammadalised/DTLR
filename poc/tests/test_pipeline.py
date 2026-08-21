@@ -60,6 +60,32 @@ class AggregationTests(unittest.TestCase):
         self.assertEqual(row["pair"], "ab")
         self.assertEqual(row["right_alignment"], "substitute")
         self.assertTrue(row["connected"])
+        self.assertEqual(row["connectivity_method"], "exclusive-core-v2")
+
+    def test_exclusive_cores_reject_overlap_false_positive(self):
+        image = np.full((7, 12), 255, dtype=np.uint8)
+        image[3, 1:6] = 0
+        image[3, 7:11] = 0
+        with TemporaryDirectory() as directory:
+            Image.fromarray(image).save(Path(directory) / "line.png")
+            record = {
+                "dataset": "IAM",
+                "split": "valid",
+                "line_id": "overlap",
+                "transcription": "bi",
+                "image_relpath": "line.png",
+                "detections": [
+                    {"predicted_char": "b", "score": 0.9, "box_xyxy": [0, 0, 6, 7]},
+                    {"predicted_char": "i", "score": 0.9, "box_xyxy": [4, 0, 12, 7]},
+                ],
+            }
+            row = line_evidence(record, Path(directory), threshold=100)[0]
+        self.assertTrue(row["connected_box_intersection_v1"])
+        self.assertTrue(row["exclusive_core_usable"])
+        self.assertFalse(row["connected_exclusive_core_v2"])
+        self.assertFalse(row["connected"])
+        self.assertEqual(row["left_exclusive_core_xyxy"], [0, 0, 4, 7])
+        self.assertEqual(row["right_exclusive_core_xyxy"], [6, 0, 12, 7])
 
 
 if __name__ == "__main__":
