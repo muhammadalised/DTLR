@@ -106,6 +106,44 @@ manually inspect the crops and record an acceptance decision. This
 visualization/acceptance step remains an explicit milestone gate; the tooling
 deliberately does not silently invent acceptance criteria.
 
+## Frozen validation gate
+
+After the test-only engineering smoke check, freeze validation IDs before
+running inference or inspecting their images. The selection rule ranks all
+validation IDs by SHA-256 of the declared seed and ID, so it is deterministic
+without relying on a language-runtime random-number implementation. The
+selection manifest also pins the `labels.pkl` and transcription hashes.
+
+```bash
+python poc/scripts/freeze_iam_selection.py \
+  --data-root "${DTLR_DATA_ROOT}" \
+  --split valid --count 32 --seed iam-dominant-core-v3-20260821 \
+  --output "${DTLR_OUTPUT_ROOT}/iam-valid-32/selection.json"
+
+python poc/scripts/export_iam_detections.py \
+  --data-root "${DTLR_DATA_ROOT}" \
+  --checkpoint "${DTLR_WEIGHTS_ROOT}/finetuned/IAM/checkpoint.pth" \
+  --checkpoint-kind iam-finetuned --split valid \
+  --selection-manifest "${DTLR_OUTPUT_ROOT}/iam-valid-32/selection.json" \
+  --threshold 0.3 --nms 0.5 \
+  --output "${DTLR_OUTPUT_ROOT}/iam-valid-32/detections.jsonl"
+
+python poc/scripts/build_bigram_evidence.py \
+  --detections "${DTLR_OUTPUT_ROOT}/iam-valid-32/detections.jsonl" \
+  --data-root "${DTLR_DATA_ROOT}" \
+  --output-dir "${DTLR_OUTPUT_ROOT}/iam-valid-32/bigrams-dominant-core-v3"
+
+python poc/scripts/render_iam_qa.py \
+  --detections "${DTLR_OUTPUT_ROOT}/iam-valid-32/detections.jsonl" \
+  --data-root "${DTLR_DATA_ROOT}" \
+  --output-dir "${DTLR_OUTPUT_ROOT}/iam-valid-32/qa-dominant-core-v3"
+```
+
+If any selected processed line image is absent, prepare that exact line using
+the same recorded IAM/PyLaia preprocessing procedure as the smoke run. Do not
+replace a difficult or failed selected line with another line; record missing
+or failed inputs as such.
+
 ## Local tests (no CUDA required)
 
 ```bash

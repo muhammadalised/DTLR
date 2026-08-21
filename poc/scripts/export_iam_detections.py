@@ -17,6 +17,7 @@ sys.path.insert(0, str(REPO))
 from datasets.IAM import make_coco_transforms  # noqa: E402
 from finetuning import build_model_main  # noqa: E402
 from util.slconfig import SLConfig  # noqa: E402
+from poc.dtlr_poc.selection import load_selected_examples, sha256_file  # noqa: E402
 
 
 def sha256(path: Path) -> str:
@@ -33,6 +34,7 @@ def main() -> int:
     parser.add_argument("--checkpoint", type=Path, required=True)
     parser.add_argument("--checkpoint-kind", required=True, choices=("iam-finetuned", "english-pretrained"))
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--selection-manifest", type=Path)
     parser.add_argument("--split", choices=("train", "valid", "test"), default="test")
     parser.add_argument("--start", type=int, default=0)
     parser.add_argument("--limit", type=int, default=8)
@@ -65,7 +67,17 @@ def main() -> int:
 
     commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=REPO, text=True).strip()
     checkpoint_sha256 = sha256(args.checkpoint)
-    examples = labels["ground_truth"][args.split][args.start:args.start + args.limit]
+    selection_provenance = None
+    if args.selection_manifest:
+        if args.start != 0 or args.limit != 8:
+            raise SystemExit("do not combine --selection-manifest with --start/--limit")
+        examples, selection = load_selected_examples(args.selection_manifest, label_path, args.split)
+        selection_provenance = {
+            "schema_version": selection["schema_version"],
+            "sha256": sha256_file(args.selection_manifest),
+        }
+    else:
+        examples = labels["ground_truth"][args.split][args.start:args.start + args.limit]
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open("w", encoding="utf-8") as out:
         for example in examples:
@@ -98,6 +110,7 @@ def main() -> int:
                 "image_width": width,
                 "image_height": height,
                 "checkpoint": {"kind": args.checkpoint_kind, "sha256": checkpoint_sha256},
+                "selection_manifest": selection_provenance,
                 "repo_commit": commit,
                 "threshold": args.threshold,
                 "nms_iou": args.nms,
