@@ -120,6 +120,12 @@ python poc/scripts/freeze_iam_selection.py \
   --split valid --count 32 --seed iam-dominant-core-v3-20260821 \
   --output "${DTLR_OUTPUT_ROOT}/iam-valid-32/selection.json"
 
+python poc/scripts/prepare_iam_selection_images.py \
+  --selection-manifest "${DTLR_OUTPUT_ROOT}/iam-valid-32/selection.json" \
+  --raw-lines-root "/absolute/path/to/extracted/iam/lines" \
+  --data-root "${DTLR_DATA_ROOT}" \
+  --output-manifest "${DTLR_OUTPUT_ROOT}/iam-valid-32/preprocessing.json"
+
 python poc/scripts/export_iam_detections.py \
   --data-root "${DTLR_DATA_ROOT}" \
   --checkpoint "${DTLR_WEIGHTS_ROOT}/finetuned/IAM/checkpoint.pth" \
