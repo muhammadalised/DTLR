@@ -3,6 +3,7 @@ import argparse
 import csv
 import json
 import sys
+from collections import Counter
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
@@ -25,7 +26,7 @@ def main() -> int:
     scores = aggregate(rows)
     write_evidence(scores, args.output_dir / "bigram_scores.csv", args.output_dir / "bigram_scores.json")
     manifest = {
-        "schema_version": "dtlr.export-manifest.v4",
+        "schema_version": "dtlr.export-manifest.v5",
         "source": str(args.detections),
         "datasets": sorted({r["dataset"] for r in records}),
         "splits": sorted({r["split"] for r in records}),
@@ -58,6 +59,11 @@ def main() -> int:
         "dominant_core_unusable_count": sum(
             row["alignment_usable"] and not row["dominant_core_usable"] for row in rows
         ),
+        "unusable_reason_counts": dict(sorted(Counter(
+            reason
+            for row in rows if not row["usable"]
+            for reason in row["unusable_reason_codes"]
+        ).items())),
         "note": "Scores remain split-specific; TVA must not fit thresholds on held-out splits.",
     }
     (args.output_dir / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")

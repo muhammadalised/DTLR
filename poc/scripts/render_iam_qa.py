@@ -104,6 +104,11 @@ def render_pair_crops(
             "connected_exclusive_core_v2_1": None,
             "connected_dominant_core_v3": None,
             "image": None,
+            "unusable_reason_codes": [
+                side + "-detection-missing"
+                for side, alignment in (("left", left_alignment), ("right", right_alignment))
+                if alignment.detection_index is None
+            ],
         }
         if left_alignment.detection_index is None or right_alignment.detection_index is None:
             results.append(item)
@@ -211,6 +216,7 @@ def render_pair_crops(
             "left_exclusive_core_xyxy": component_evidence["left_core_box"],
             "right_exclusive_core_xyxy": component_evidence["right_core_box"],
             "exclusive_core_geometry_valid": all(core_boxes_drawable),
+            "unusable_reason_codes": component_evidence["unusable_reason_codes"],
             "image": str(Path("pairs") / record["line_id"] / filename),
         })
         results.append(item)
@@ -223,6 +229,10 @@ def write_review_index(lines: list[dict], output: Path) -> None:
         cards = []
         for pair in line["pairs"]:
             state = "unusable" if not pair["usable"] else "connected" if pair["connected"] else "disconnected"
+            reason_text = (
+                "; reasons=" + ",".join(pair["unusable_reason_codes"])
+                if pair["unusable_reason_codes"] else ""
+            )
             image = (
                 f'<a href="{html.escape(pair["image"])}"><img loading="lazy" src="{html.escape(pair["image"])}"></a>'
                 if pair["image"] else "<p>No pair image: one or both detections are missing.</p>"
@@ -232,7 +242,8 @@ def write_review_index(lines: list[dict], output: Path) -> None:
                 f'{html.escape(pair["pair"])} — dominant-v3 {state}; '
                 f'core-v2.1={pair["connected_exclusive_core_v2_1"]}; '
                 f'core-v2={pair["connected_exclusive_core_v2"]}; '
-                f'box-v1={pair["connected_box_intersection_v1"]}</h3>{image}</article>'
+                f'box-v1={pair["connected_box_intersection_v1"]}'
+                f'{html.escape(reason_text)}</h3>{image}</article>'
             )
         sections.append(
             f'<details><summary>{html.escape(line["line_id"])} — '
@@ -256,6 +267,8 @@ img {{ width: min(100%, 960px); image-rendering: auto; }}
 component in both raster-safe cores. When disconnected, blue is dominant in the
 left core and orange in the right. Rejected core-v2.1, core-v2, and box-v1
 results remain for comparison.</p>
+<p>Unusable reason codes describe mechanical abstention causes only; visual
+causes such as partial-character localization still require manual review.</p>
 {"".join(sections)}
 """
     output.write_text(document, encoding="utf-8")
@@ -360,7 +373,7 @@ def main() -> int:
         lines.append(line)
     write_review_index(lines, args.output_dir / "index.html")
     manifest = {
-        "schema_version": "dtlr.qa-manifest.v5",
+        "schema_version": "dtlr.qa-manifest.v6",
         "source": str(args.detections),
         "line_count": len(lines),
         "pair_count": sum(len(line["pairs"]) for line in lines),
@@ -378,6 +391,11 @@ def main() -> int:
             pair.get("exclusive_core_geometry_valid") is False
             for line in lines for pair in line["pairs"]
         ),
+        "unusable_reason_counts": dict(sorted(Counter(
+            reason
+            for line in lines for pair in line["pairs"] if not pair["usable"]
+            for reason in pair["unusable_reason_codes"]
+        ).items())),
         "ink_threshold": args.ink_threshold if args.ink_threshold is not None else "otsu-per-line",
         "status": "pending-manual-review",
         "review_index": "index.html",

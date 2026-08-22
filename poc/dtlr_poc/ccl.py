@@ -89,6 +89,25 @@ def unique_dominant_component(counts: dict[int, int]) -> int | None:
     return winners[0] if len(winners) == 1 else None
 
 
+def core_unusable_reasons(
+    side: str,
+    box: list[float],
+    counts: dict[int, int],
+    dominant: int | None,
+) -> list[str]:
+    """Describe an unusable core mechanically, without guessing visual cause."""
+    x0, y0, x1, y1 = box
+    if x1 < x0 or y1 < y0:
+        return [f"{side}-core-inverted"]
+    if x1 == x0 or y1 == y0:
+        return [f"{side}-core-collapsed"]
+    if not counts:
+        return [f"{side}-core-no-ink"]
+    if dominant is None:
+        return [f"{side}-core-dominant-tie"]
+    return []
+
+
 def exclusive_core_boxes_v2(
     left_box: list[float], right_box: list[float]
 ) -> tuple[list[float], list[float]]:
@@ -141,6 +160,10 @@ def pair_component_evidence(
     right_core_counts = component_pixel_counts_in_box(labels, right_core_box)
     left_dominant = unique_dominant_component(left_core_counts)
     right_dominant = unique_dominant_component(right_core_counts)
+    unusable_reason_codes = (
+        core_unusable_reasons("left", left_core_box, left_core_counts, left_dominant)
+        + core_unusable_reasons("right", right_core_box, right_core_counts, right_dominant)
+    )
     dominant_usable = left_dominant is not None and right_dominant is not None
     return {
         "left_full_components": left_full,
@@ -171,6 +194,7 @@ def pair_component_evidence(
             if right_dominant is not None else None
         ),
         "dominant_core_usable": dominant_usable,
+        "unusable_reason_codes": unusable_reason_codes,
         "connected_box_intersection_v1": bool(shared_full),
         "connected_exclusive_core_v2": bool(shared_core_v2) if core_usable_v2 else None,
         "connected_exclusive_core_v2_1": bool(shared_core) if core_usable else None,

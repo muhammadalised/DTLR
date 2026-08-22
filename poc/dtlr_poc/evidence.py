@@ -10,7 +10,7 @@ from .alignment import gt_detection_map
 from .ccl import label_ink, pair_component_evidence
 
 
-SCHEMA_VERSION = "dtlr.bigram-evidence.v4"
+SCHEMA_VERSION = "dtlr.bigram-evidence.v5"
 CONNECTIVITY_METHOD = "dominant-core-v3"
 
 
@@ -59,6 +59,11 @@ def line_evidence(record: dict, data_root: Path, threshold: int | None = None) -
             "right_dominant_component_id": None,
             "left_dominant_component_share": None,
             "right_dominant_component_share": None,
+            "unusable_reason_codes": [
+                side + "-detection-missing"
+                for side, alignment in (("left", left_alignment), ("right", right_alignment))
+                if alignment.detection_index is None
+            ],
             "ccl_component_count": component_count,
         }
         if left_alignment.detection_index is not None and right_alignment.detection_index is not None:
@@ -93,6 +98,7 @@ def line_evidence(record: dict, data_root: Path, threshold: int | None = None) -
                 "right_dominant_component_id": component_evidence["right_dominant_component"],
                 "left_dominant_component_share": component_evidence["left_dominant_share"],
                 "right_dominant_component_share": component_evidence["right_dominant_share"],
+                "unusable_reason_codes": component_evidence["unusable_reason_codes"],
                 "left_core_component_pixel_counts": component_evidence["left_core_component_pixel_counts"],
                 "right_core_component_pixel_counts": component_evidence["right_core_component_pixel_counts"],
                 "left_score": detections[left_alignment.detection_index]["score"],
@@ -147,7 +153,7 @@ def aggregate(rows: list[dict]) -> list[dict]:
             != item.get("connected_dominant_core_v3", item["connected"])
         ]
         result.append({
-            "schema_version": "dtlr.bigram-scores.v4",
+            "schema_version": "dtlr.bigram-scores.v5",
             "dataset": dataset,
             "split": split,
             "pair": pair,

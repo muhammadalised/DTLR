@@ -55,7 +55,7 @@ class QARendererTests(unittest.TestCase):
             }
             output, manifest = self.run_renderer(root, record)
             pair = manifest["lines"][0]["pairs"][0]
-            self.assertEqual(manifest["schema_version"], "dtlr.qa-manifest.v5")
+            self.assertEqual(manifest["schema_version"], "dtlr.qa-manifest.v6")
             self.assertEqual(manifest["pair_count"], 1)
             self.assertEqual(manifest["usable_pair_count"], 1)
             self.assertEqual(manifest["primary_connectivity_method"], "dominant-core-v3")
@@ -90,6 +90,7 @@ class QARendererTests(unittest.TestCase):
             self.assertEqual(manifest["invalid_exclusive_core_geometry_count"], 1)
             self.assertFalse(pair["usable"])
             self.assertFalse(pair["exclusive_core_geometry_valid"])
+            self.assertIn("right-core-inverted", pair["unusable_reason_codes"])
             self.assertEqual(pair["right_exclusive_core_xyxy"], [45, 4, 20, 20])
             self.assertTrue((output / pair["image"]).is_file())
 

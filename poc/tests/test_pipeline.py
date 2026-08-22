@@ -64,6 +64,12 @@ class CCLTests(unittest.TestCase):
             result["left_dominant_component"], result["right_dominant_component"]
         )
 
+    def test_nested_box_reports_inverted_core(self):
+        labels = np.zeros((7, 12), dtype=np.int32)
+        result = pair_component_evidence(labels, [0, 0, 10, 7], [4, 0, 8, 7])
+        self.assertFalse(result["dominant_core_usable"])
+        self.assertIn("right-core-inverted", result["unusable_reason_codes"])
+
 
 class AggregationTests(unittest.TestCase):
     def test_splits_are_never_combined(self):
@@ -121,6 +127,21 @@ class AggregationTests(unittest.TestCase):
         self.assertFalse(row["connected"])
         self.assertEqual(row["left_exclusive_core_xyxy"], [0, 0, 4, 7])
         self.assertEqual(row["right_exclusive_core_xyxy"], [6, 0, 12, 7])
+
+    def test_missing_detection_has_explicit_reason(self):
+        image = np.full((5, 8), 255, dtype=np.uint8)
+        with TemporaryDirectory() as directory:
+            Image.fromarray(image).save(Path(directory) / "line.png")
+            record = {
+                "dataset": "IAM", "split": "valid", "line_id": "missing",
+                "transcription": "ab", "image_relpath": "line.png",
+                "detections": [
+                    {"predicted_char": "a", "score": 0.9, "box_xyxy": [0, 0, 4, 5]},
+                ],
+            }
+            row = line_evidence(record, Path(directory), threshold=100)[0]
+        self.assertFalse(row["usable"])
+        self.assertEqual(row["unusable_reason_codes"], ["right-detection-missing"])
 
 
 if __name__ == "__main__":

@@ -29,6 +29,11 @@ whitespace are excluded).
   failures and method changes are
   recorded in
   [`provenance/connectivity-method-change-2026-08-21.md`](provenance/connectivity-method-change-2026-08-21.md).
+- Unusable pairs are abstentions, never disconnected labels. Evidence and QA
+  exports include objective `unusable_reason_codes` for missing detections,
+  inverted or collapsed core geometry, cores containing no ink, and tied
+  dominant components. Visual causes such as partial-character or dot-only
+  localization remain manual review annotations and are not inferred.
 - Aggregates are keyed by dataset **and split**. Do not pool train/validation/test
   evidence or tune TVA using held-out IAM evidence.
 
