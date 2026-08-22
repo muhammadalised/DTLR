@@ -1,4 +1,5 @@
 import json
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -66,7 +67,14 @@ class ReviewQueueTests(unittest.TestCase):
             queue = json.loads((output / "review_queue.json").read_text(encoding="utf-8"))
             self.assertEqual(queue["queue_count"], 4)
             self.assertTrue((output / "review_queue.csv").is_file())
-            self.assertIn("IAM validation manual review", (output / "review_queue.html").read_text())
+            page = (output / "review_queue.html").read_text()
+            self.assertIn("IAM validation manual review", page)
+            self.assertIn("JSON.stringify(payload,null,2)+'\\n'", page)
+            if node := shutil.which("node"):
+                script = page.split("<script>", 1)[1].split("</script>", 1)[0]
+                javascript = root / "review.js"
+                javascript.write_text(script, encoding="utf-8")
+                subprocess.run([node, "--check", str(javascript)], check=True, capture_output=True)
 
 
 if __name__ == "__main__":

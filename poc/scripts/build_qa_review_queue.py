@@ -77,17 +77,19 @@ textarea { width: 95%; min-height: 60px; }
 <script>
 const queue = __QUEUE__;
 const storageKey = "dtlr-review:" + queue.qa_manifest_sha256 + ":" + queue.seed;
-let answers = JSON.parse(localStorage.getItem(storageKey) || "{}");
+let answers = {}, storageEnabled = true;
+try { answers = JSON.parse(localStorage.getItem(storageKey) || "{}"); }
+catch (error) { storageEnabled = false; }
 let visible = queue.rows.map((_, i) => i), cursor = 0;
 const esc = s => String(s ?? "").replace(/[&<>\"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 function answer(row) { return answers[row.pair_id] || {alignment:"pending",visual_connectivity:"pending",v3_assessment:"pending",visual_cause:"",notes:""}; }
-function save(row, key, value) { const a=answer(row); a[key]=value; answers[row.pair_id]=a; localStorage.setItem(storageKey,JSON.stringify(answers)); render(); }
+function save(row, key, value) { const a=answer(row); a[key]=value; answers[row.pair_id]=a; if(storageEnabled){try{localStorage.setItem(storageKey,JSON.stringify(answers));}catch(error){storageEnabled=false;}} render(); }
 function options(name, values, selected) { return `<select data-key="${name}">${values.map(v=>`<option ${v===selected?'selected':''}>${v}</option>`).join('')}</select>`; }
 function render() {
   if (!visible.length) { document.querySelector('#card').innerHTML='<p>No rows in this filter.</p>'; return; }
   cursor=Math.max(0,Math.min(cursor,visible.length-1)); const row=queue.rows[visible[cursor]], a=answer(row);
   const done=visible.filter(i => answer(queue.rows[i]).v3_assessment !== 'pending').length;
-  document.querySelector('#progress').textContent=`${cursor+1}/${visible.length}; assessed ${done}/${visible.length}`;
+  document.querySelector('#progress').textContent=`${cursor+1}/${visible.length}; assessed ${done}/${visible.length}${storageEnabled?'':' (export often: browser storage unavailable)'}`;
   document.querySelector('#card').innerHTML=`
     <h2>${esc(row.queue_group)} — ${esc(row.pair_id)} — ${esc(row.pair)}</h2>
     <div class="meta">alignment=${esc(row.left_alignment)}/${esc(row.right_alignment)}\nv3=${esc(row.connected_dominant_core_v3)}  v2.1=${esc(row.connected_exclusive_core_v2_1)}\nreasons=${esc((row.unusable_reason_codes||[]).join(','))}</div>
@@ -101,7 +103,7 @@ function render() {
 }
 document.querySelector('#prev').onclick=()=>{cursor--;render();}; document.querySelector('#next').onclick=()=>{cursor++;render();};
 document.querySelector('#filter').onchange=e=>{visible=queue.rows.map((r,i)=>[r,i]).filter(([r])=>e.target.value==='all'||r.queue_group===e.target.value).map(([,i])=>i);cursor=0;render();};
-document.querySelector('#export').onclick=()=>{const payload={schema_version:'dtlr.qa-review.v1',queue_schema_version:queue.schema_version,qa_manifest_sha256:queue.qa_manifest_sha256,seed:queue.seed,exported_utc:new Date().toISOString(),annotations:answers};const blob=new Blob([JSON.stringify(payload,null,2)+'\n'],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='manual_review.json';a.click();URL.revokeObjectURL(a.href);};
+document.querySelector('#export').onclick=()=>{const payload={schema_version:'dtlr.qa-review.v1',queue_schema_version:queue.schema_version,qa_manifest_sha256:queue.qa_manifest_sha256,seed:queue.seed,exported_utc:new Date().toISOString(),annotations:answers};const blob=new Blob([JSON.stringify(payload,null,2)+'\\n'],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='manual_review.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);};
 render();
 </script>
 """.replace("__QUEUE__", embedded)
