@@ -174,6 +174,23 @@ The command exits nonzero for pending fields or internally inconsistent labels.
 It reports observed outcomes by queue stratum; it does not misrepresent the
 stratified review queue as a simple random accuracy sample.
 
+Inspect the frozen-review false disconnections and separately recorded ad-hoc
+discoveries without changing the review or connectivity implementation:
+
+```bash
+python poc/scripts/inspect_pair_failures.py \
+  --detections "${DTLR_OUTPUT_ROOT}/iam-valid-32/detections.jsonl" \
+  --data-root "${DTLR_DATA_ROOT}" \
+  --selection poc/config/iam_v3_failure_cases_20260822.json \
+  --output-dir "${DTLR_OUTPUT_ROOT}/iam-valid-32/failure-diagnostics"
+```
+
+Open `failure-diagnostics/index.html`. Each case includes the original
+grayscale crop, the Otsu binary mask, all 8-connected components, dominant and
+shared core evidence, a threshold sweep, and per-component pixel shares in
+`failure_diagnostics.json`. The two ad-hoc cases remain explicitly excluded
+from the frozen 169-pair review summary.
+
 If any selected processed line image is absent, prepare that exact line using
 the same recorded IAM/PyLaia preprocessing procedure as the smoke run. Do not
 replace a difficult or failed selected line with another line; record missing

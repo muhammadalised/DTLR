@@ -1,0 +1,41 @@
+{
+  "schema_version": "dtlr.failure-inspection-selection.v1",
+  "dataset": "IAM",
+  "split": "valid",
+  "created_date": "2026-08-22",
+  "review_queue_sha256": "2acd0be3121bca9c85880d4bb9fa80cae2c78b255b6f8a89c83309bd7d8a6522",
+  "manual_review_sha256": "fcce2badd8641ba009a2511edeba68d38d5c718d6a155132aed6de6996e4c96d",
+  "cases": [
+    {
+      "pair_id": "f07-032b-06:14:15",
+      "source": "frozen-review-error",
+      "manual_visual_connectivity": "connected"
+    },
+    {
+      "pair_id": "f07-032b-06:15:16",
+      "source": "frozen-review-error",
+      "manual_visual_connectivity": "connected"
+    },
+    {
+      "pair_id": "n06-194-07:1:2",
+      "source": "frozen-review-error",
+      "manual_visual_connectivity": "connected"
+    },
+    {
+      "pair_id": "p03-096-02:5:6",
+      "source": "frozen-review-error",
+      "manual_visual_connectivity": "connected"
+    },
+    {
+      "pair_id": "n03-079-05:8:9",
+      "source": "ad-hoc-discovery",
+      "manual_visual_connectivity": "connected"
+    },
+    {
+      "pair_id": "n06-194-07:22:23",
+      "source": "ad-hoc-discovery",
+      "manual_visual_connectivity": "connected"
+    }
+  ],
+  "note": "The two ad-hoc discoveries remain separate from the frozen 169-pair review result."
+}
