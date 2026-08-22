@@ -191,6 +191,24 @@ shared core evidence, a threshold sweep, and per-component pixel shares in
 `failure_diagnostics.json`. The two ad-hoc cases remain explicitly excluded
 from the frozen 169-pair review summary.
 
+After completing the frozen review, compare shared-component support across
+all v2.1/v3 disagreements:
+
+```bash
+python poc/scripts/analyze_disagreement_support.py \
+  --detections "${DTLR_OUTPUT_ROOT}/iam-valid-32/detections.jsonl" \
+  --data-root "${DTLR_DATA_ROOT}" \
+  --queue "${DTLR_OUTPUT_ROOT}/iam-valid-32/qa-dominant-core-v3/review/review_queue.json" \
+  --manual-review "${DTLR_OUTPUT_ROOT}/iam-valid-32/qa-dominant-core-v3/review/manual_review.json" \
+  --output-dir "${DTLR_OUTPUT_ROOT}/iam-valid-32/disagreement-support-analysis"
+```
+
+The bidirectional-support feature is the maximum, across components present in
+both cores, of the smaller left/right core pixel share. The report contains
+label-stratified distributions and exploratory threshold metrics. It does not
+change v3, include ad-hoc discoveries, or present validation-selected metrics
+as held-out performance.
+
 If any selected processed line image is absent, prepare that exact line using
 the same recorded IAM/PyLaia preprocessing procedure as the smoke run. Do not
 replace a difficult or failed selected line with another line; record missing
