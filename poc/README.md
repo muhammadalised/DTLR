@@ -161,6 +161,19 @@ a deterministic hash-selected audit of ordinary agreements. Open
 completed `manual_review.json` from the page and retain it with the run outputs.
 The JSON/CSV queue files pin the review scope independently of browser state.
 
+Validate and summarize the exported annotations before accepting the review:
+
+```bash
+python poc/scripts/summarize_qa_review.py \
+  --queue "${DTLR_OUTPUT_ROOT}/iam-valid-32/qa-dominant-core-v3/review/review_queue.json" \
+  --manual-review "${DTLR_OUTPUT_ROOT}/iam-valid-32/qa-dominant-core-v3/review/manual_review.json" \
+  --output "${DTLR_OUTPUT_ROOT}/iam-valid-32/qa-dominant-core-v3/review/manual_review_summary.json"
+```
+
+The command exits nonzero for pending fields or internally inconsistent labels.
+It reports observed outcomes by queue stratum; it does not misrepresent the
+stratified review queue as a simple random accuracy sample.
+
 If any selected processed line image is absent, prepare that exact line using
 the same recorded IAM/PyLaia preprocessing procedure as the smoke run. Do not
 replace a difficult or failed selected line with another line; record missing

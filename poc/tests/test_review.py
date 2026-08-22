@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from dtlr_poc.review import build_review_rows
+from dtlr_poc.review import build_review_rows, summarize_review
 
 
 REPO = Path(__file__).resolve().parents[2]
@@ -75,6 +75,42 @@ class ReviewQueueTests(unittest.TestCase):
                 javascript = root / "review.js"
                 javascript.write_text(script, encoding="utf-8")
                 subprocess.run([node, "--check", str(javascript)], check=True, capture_output=True)
+
+    def test_summary_separates_false_disconnected_and_alignment_failures(self):
+        rows = [
+            {**pair(0, v3=False), "pair_id": "line:0:1", "queue_group": "agreement-audit"},
+            {**pair(1, v3=True), "pair_id": "line:1:2", "queue_group": "agreement-audit"},
+            {**pair(2, usable=False), "pair_id": "line:2:3", "queue_group": "unusable"},
+        ]
+        queue = {
+            "schema_version": "dtlr.qa-review-queue.v1", "qa_manifest_sha256": "qa",
+            "seed": "seed", "rows": rows,
+        }
+        review = {
+            "schema_version": "dtlr.qa-review.v1",
+            "queue_schema_version": "dtlr.qa-review-queue.v1",
+            "qa_manifest_sha256": "qa", "seed": "seed",
+            "annotations": {
+                "line:0:1": {"alignment": "correct", "visual_connectivity": "connected", "v3_assessment": "incorrect"},
+                "line:1:2": {"alignment": "incorrect", "visual_connectivity": "connected", "v3_assessment": "uncertain"},
+                "line:2:3": {"alignment": "incorrect", "visual_connectivity": "uncertain", "v3_assessment": "appropriate-abstention"},
+            },
+        }
+        summary = summarize_review(queue, review)
+        self.assertEqual(summary["status"], "complete")
+        self.assertEqual(summary["alignment_failure_count"], 2)
+        self.assertEqual(summary["evaluable_v3_count"], 1)
+        self.assertEqual(summary["observed_false_disconnected_count"], 1)
+
+    def test_summary_rejects_inconsistent_assessment(self):
+        row = {**pair(0, v3=False), "pair_id": "line:0:1", "queue_group": "agreement-audit"}
+        queue = {"schema_version": "dtlr.qa-review-queue.v1", "qa_manifest_sha256": "qa", "seed": "seed", "rows": [row]}
+        review = {
+            "schema_version": "dtlr.qa-review.v1", "queue_schema_version": queue["schema_version"],
+            "qa_manifest_sha256": "qa", "seed": "seed",
+            "annotations": {"line:0:1": {"alignment": "correct", "visual_connectivity": "connected", "v3_assessment": "correct"}},
+        }
+        self.assertEqual(summarize_review(queue, review)["status"], "needs-attention")
 
 
 if __name__ == "__main__":
