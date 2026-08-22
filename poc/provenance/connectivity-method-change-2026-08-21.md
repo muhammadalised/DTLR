@@ -4,8 +4,9 @@
 
 `box-intersection-v1`, `exclusive-core-v2`, and `exclusive-core-v2.1` are
 rejected as primary boundary labels. Their results are retained in exports for
-comparison and provenance. `dominant-core-v3` is the new candidate and still
-requires validation on non-test IAM data.
+comparison and provenance. `dominant-core-v3` was the new candidate at the time
+of this record. Its subsequent validation and POC freeze are documented in
+[`connectivity-method-freeze-2026-08-23.md`](connectivity-method-freeze-2026-08-23.md).
 
 ## Triggering observation
 
@@ -51,7 +52,7 @@ Exports use `dominant-core-v3` for the primary `usable`, `connected`, and
 aggregate rate fields. Explicit v1, v2, v2.1, and v3 fields remain side by side
 so each behavior change is auditable rather than silent.
 
-## Next validation gate
+## Validation gate recorded at the time
 
 Run and visually review a fixed IAM validation-split sample before scaling or
 exporting evidence for TVA. Do not select CCL, detection, threshold, or NMS

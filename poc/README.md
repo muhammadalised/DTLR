@@ -24,11 +24,12 @@ whitespace are excluded).
   neighboring character. The primary `dominant-core-v3` method marks a pair
   `connected` only when the same CCL component has the unique largest pixel
   support in both raster-safe cores. Empty cores and tied largest components are
-  unusable. This parameter-free candidate still requires validation on non-test
-  data before it is treated as a handwriting boundary label. The observed
-  failures and method changes are
-  recorded in
-  [`provenance/connectivity-method-change-2026-08-21.md`](provenance/connectivity-method-change-2026-08-21.md).
+  unusable. This parameter-free method is frozen for the IAM bigram POC after
+  non-test validation. The observed failures, method changes, corrected review
+  provenance, and limited scope of the freeze are recorded in
+  [`provenance/connectivity-method-change-2026-08-21.md`](provenance/connectivity-method-change-2026-08-21.md)
+  and
+  [`provenance/connectivity-method-freeze-2026-08-23.md`](provenance/connectivity-method-freeze-2026-08-23.md).
 - Unusable pairs are abstentions, never disconnected labels. Evidence and QA
   exports include objective `unusable_reason_codes` for missing detections,
   inverted or collapsed core geometry, cores containing no ink, and tied
@@ -208,6 +209,41 @@ both cores, of the smaller left/right core pixel share. The report contains
 label-stratified distributions and exploratory threshold metrics. It does not
 change v3, include ad-hoc discoveries, or present validation-selected metrics
 as held-out performance.
+
+## Full IAM training evidence after the method freeze
+
+Freeze the complete training split before preprocessing or inference. The test
+split remains untouched while tokenizer policy is developed:
+
+```bash
+python poc/scripts/freeze_iam_selection.py \
+  --data-root "${DTLR_DATA_ROOT}" \
+  --split train --all --seed iam-train-complete-v3-20260823 \
+  --output "${DTLR_OUTPUT_ROOT}/iam-train-full/selection.json"
+
+python poc/scripts/prepare_iam_selection_images.py \
+  --selection-manifest "${DTLR_OUTPUT_ROOT}/iam-train-full/selection.json" \
+  --raw-lines-root "/absolute/path/to/extracted/iam/lines" \
+  --data-root "${DTLR_DATA_ROOT}" \
+  --output-manifest "${DTLR_OUTPUT_ROOT}/iam-train-full/preprocessing.json"
+
+python poc/scripts/export_iam_detections.py \
+  --data-root "${DTLR_DATA_ROOT}" \
+  --checkpoint "${DTLR_WEIGHTS_ROOT}/finetuned/IAM/checkpoint.pth" \
+  --checkpoint-kind iam-finetuned --split train \
+  --selection-manifest "${DTLR_OUTPUT_ROOT}/iam-train-full/selection.json" \
+  --threshold 0.3 --nms 0.5 \
+  --output "${DTLR_OUTPUT_ROOT}/iam-train-full/detections.jsonl"
+
+python poc/scripts/build_bigram_evidence.py \
+  --detections "${DTLR_OUTPUT_ROOT}/iam-train-full/detections.jsonl" \
+  --data-root "${DTLR_DATA_ROOT}" \
+  --output-dir "${DTLR_OUTPUT_ROOT}/iam-train-full/bigrams-dominant-core-v3"
+```
+
+The complete-split selection still records every line ID, transcription hash,
+and the `labels.pkl` hash. Do not aggregate these training scores with
+validation or test scores.
 
 If any selected processed line image is absent, prepare that exact line using
 the same recorded IAM/PyLaia preprocessing procedure as the smoke run. Do not

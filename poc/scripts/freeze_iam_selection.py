@@ -3,6 +3,7 @@
 
 import argparse
 import json
+import pickle
 import sys
 from pathlib import Path
 
@@ -16,13 +17,20 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--data-root", type=Path, required=True)
     parser.add_argument("--split", choices=("train", "valid", "test"), required=True)
-    parser.add_argument("--count", type=int, required=True)
+    size = parser.add_mutually_exclusive_group(required=True)
+    size.add_argument("--count", type=int)
+    size.add_argument("--all", action="store_true", help="select the complete declared split")
     parser.add_argument("--seed", required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
 
     labels_path = args.data_root / "IAM_new/labels.pkl"
-    selection = build_selection(labels_path, args.split, args.count, args.seed)
+    if args.all:
+        labels = pickle.loads(labels_path.read_bytes())
+        count = len(labels["ground_truth"][args.split])
+    else:
+        count = args.count
+    selection = build_selection(labels_path, args.split, count, args.seed)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     if args.output.exists():
         existing = json.loads(args.output.read_text(encoding="utf-8"))
