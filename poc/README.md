@@ -148,7 +148,18 @@ python poc/scripts/render_iam_qa.py \
   --detections "${DTLR_OUTPUT_ROOT}/iam-valid-32/detections.jsonl" \
   --data-root "${DTLR_DATA_ROOT}" \
   --output-dir "${DTLR_OUTPUT_ROOT}/iam-valid-32/qa-dominant-core-v3"
+
+python poc/scripts/build_qa_review_queue.py \
+  --qa-manifest "${DTLR_OUTPUT_ROOT}/iam-valid-32/qa-dominant-core-v3/qa_manifest.json" \
+  --agreement-audit-count 100 --seed iam-v3-agreement-audit-20260822 \
+  --output-dir "${DTLR_OUTPUT_ROOT}/iam-valid-32/qa-dominant-core-v3/review"
 ```
+
+The review queue contains every v2.1/v3 disagreement, every unusable pair, and
+a deterministic hash-selected audit of ordinary agreements. Open
+`review/review_queue.html`; progress is saved locally in the browser. Export the
+completed `manual_review.json` from the page and retain it with the run outputs.
+The JSON/CSV queue files pin the review scope independently of browser state.
 
 If any selected processed line image is absent, prepare that exact line using
 the same recorded IAM/PyLaia preprocessing procedure as the smoke run. Do not
