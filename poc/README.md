@@ -233,6 +233,7 @@ python poc/scripts/export_iam_detections.py \
   --checkpoint-kind iam-finetuned --split train \
   --selection-manifest "${DTLR_OUTPUT_ROOT}/iam-train-full/selection.json" \
   --threshold 0.3 --nms 0.5 \
+  --resume \
   --output "${DTLR_OUTPUT_ROOT}/iam-train-full/detections.jsonl"
 
 python poc/scripts/build_bigram_evidence.py \
@@ -243,7 +244,9 @@ python poc/scripts/build_bigram_evidence.py \
 
 The complete-split selection still records every line ID, transcription hash,
 and the `labels.pkl` hash. Do not aggregate these training scores with
-validation or test scores.
+validation or test scores. `--resume` creates a new output when absent; when an
+output already exists, it appends only after verifying that every existing
+record is an exact, provenance-compatible prefix of the frozen selection.
 
 If any selected processed line image is absent, prepare that exact line using
 the same recorded IAM/PyLaia preprocessing procedure as the smoke run. Do not

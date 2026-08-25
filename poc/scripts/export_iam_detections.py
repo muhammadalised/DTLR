@@ -18,6 +18,7 @@ from datasets.IAM import make_coco_transforms  # noqa: E402
 from finetuning import build_model_main  # noqa: E402
 from util.slconfig import SLConfig  # noqa: E402
 from poc.dtlr_poc.selection import load_selected_examples, sha256_file  # noqa: E402
+from poc.dtlr_poc.detection_resume import read_jsonl_for_resume, validate_resume_prefix  # noqa: E402
 
 
 def sha256(path: Path) -> str:
@@ -40,6 +41,10 @@ def main() -> int:
     parser.add_argument("--limit", type=int, default=8)
     parser.add_argument("--threshold", type=float, default=0.3)
     parser.add_argument("--nms", type=float, default=0.5)
+    parser.add_argument(
+        "--resume", action="store_true",
+        help="append only after validating that existing output is an exact compatible prefix",
+    )
     args = parser.parse_args()
     if args.checkpoint_kind != "iam-finetuned":
         print("WARNING: English-pretrained is a language/synthetic pretraining checkpoint; it does not verify the IAM fine-tuned milestone.", file=sys.stderr)
@@ -48,6 +53,38 @@ def main() -> int:
 
     label_path = args.data_root / "IAM_new/labels.pkl"
     labels = pickle.loads(label_path.read_bytes())
+    commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=REPO, text=True).strip()
+    checkpoint_sha256 = sha256(args.checkpoint)
+    selection_provenance = None
+    if args.selection_manifest:
+        if args.start != 0 or args.limit != 8:
+            raise SystemExit("do not combine --selection-manifest with --start/--limit")
+        examples, selection = load_selected_examples(args.selection_manifest, label_path, args.split)
+        selection_provenance = {
+            "schema_version": selection["schema_version"],
+            "sha256": sha256_file(args.selection_manifest),
+        }
+    else:
+        examples = labels["ground_truth"][args.split][args.start:args.start + args.limit]
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    if args.output.exists() and not args.resume:
+        raise SystemExit(f"refusing to overwrite existing output; use --resume after verifying the intended run: {args.output}")
+    existing = read_jsonl_for_resume(args.output) if args.resume else []
+    expected = {
+        "schema_version": "dtlr.detections.v1",
+        "dataset": "IAM",
+        "split": args.split,
+        "checkpoint": {"kind": args.checkpoint_kind, "sha256": checkpoint_sha256},
+        "selection_manifest": selection_provenance,
+        "repo_commit": commit,
+        "threshold": args.threshold,
+        "nms_iou": args.nms,
+    }
+    validate_resume_prefix(existing, examples, expected)
+    if len(existing) == len(examples):
+        print(f"Detection export already complete: {len(existing)}/{len(examples)} records")
+        return 0
+
     charset = json.loads((REPO / "datasets/default_charset.json").read_text())
     config = SLConfig.fromfile(str(REPO / "config/Latin_CTC.py"))
     config.dataset_file = "IAM"
@@ -65,22 +102,9 @@ def main() -> int:
     postprocessors["bbox"].num_select = 900
     postprocessors["bbox"].nms_iou_threshold = args.nms
 
-    commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=REPO, text=True).strip()
-    checkpoint_sha256 = sha256(args.checkpoint)
-    selection_provenance = None
-    if args.selection_manifest:
-        if args.start != 0 or args.limit != 8:
-            raise SystemExit("do not combine --selection-manifest with --start/--limit")
-        examples, selection = load_selected_examples(args.selection_manifest, label_path, args.split)
-        selection_provenance = {
-            "schema_version": selection["schema_version"],
-            "sha256": sha256_file(args.selection_manifest),
-        }
-    else:
-        examples = labels["ground_truth"][args.split][args.start:args.start + args.limit]
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    with args.output.open("w", encoding="utf-8") as out:
-        for example in examples:
+    mode = "a" if args.output.exists() else "x"
+    with args.output.open(mode, encoding="utf-8") as out:
+        for position, example in enumerate(examples[len(existing):], len(existing) + 1):
             relpath = Path("IAM_new/data/imgs/lines") / f"{example['id']}.jpg"
             image = Image.open(args.data_root / relpath).convert("RGB")
             width, height = image.size
@@ -117,7 +141,11 @@ def main() -> int:
                 "detections": detections,
             }
             out.write(json.dumps(record, ensure_ascii=False) + "\n")
-            print(f"{example['id']}: {len(detections)} detections for {len(example['text'])} GT characters")
+            out.flush()
+            print(
+                f"[{position}/{len(examples)}] {example['id']}: "
+                f"{len(detections)} detections for {len(example['text'])} GT characters"
+            )
     return 0
 
 
