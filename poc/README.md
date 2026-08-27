@@ -248,6 +248,33 @@ validation or test scores. `--resume` creates a new output when absent; when an
 output already exists, it appends only after verifying that every existing
 record is an exact, provenance-compatible prefix of the frozen selection.
 
+## Provisional Friday tokenizer demonstration
+
+Build a train-derived model using exact-alignment observations. The defaults
+require at least 20 observations, a v3 connected rate of at least 0.5, and two
+Unicode letters; these are transparent demonstration settings, not a frozen or
+held-out-validated tokenizer policy:
+
+```bash
+python poc/scripts/build_iam_bigram_tokenizer.py \
+  --scores "${DTLR_OUTPUT_ROOT}/iam-train-full/bigrams-dominant-core-v3/bigram_scores.json" \
+  --minimum-count 20 --rate-threshold 0.5 --pair-policy letters-only \
+  --output "${DTLR_OUTPUT_ROOT}/iam-train-full/tokenizer-demo/model.json"
+
+python poc/scripts/tokenize_iam_bigrams.py \
+  --model "${DTLR_OUTPUT_ROOT}/iam-train-full/tokenizer-demo/model.json" \
+  --text "the handwriting" \
+  --text "connected character components" \
+  --output "${DTLR_OUTPUT_ROOT}/iam-train-full/tokenizer-demo/examples.json"
+```
+
+The tokenizer uses dynamic programming to select the maximum-total-utility set
+of non-overlapping eligible bigrams. Single characters have zero utility;
+eligible bigram utility is the train-derived exact-alignment connected rate.
+Whitespace and punctuation are preserved as single-character tokens under the
+default letters-only policy. Model and demo exports explicitly retain the
+`provisional-demo-policy` status.
+
 If any selected processed line image is absent, prepare that exact line using
 the same recorded IAM/PyLaia preprocessing procedure as the smoke run. Do not
 replace a difficult or failed selected line with another line; record missing
