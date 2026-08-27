@@ -275,6 +275,19 @@ Whitespace and punctuation are preserved as single-character tokens under the
 default letters-only policy. Model and demo exports explicitly retain the
 `provisional-demo-policy` status.
 
+The model JSON also exposes the interface familiar from TVA's bigram tokenizer:
+`vocab` maps tokens to integer IDs, `idx_token` maps IDs back to tokens, and
+`size` records the blank-plus-character-plus-bigram vocabulary size. As in TVA,
+the empty string at ID 0 is reserved for the CTC blank and is never emitted by
+label encoding. The local
+`HandwritingBigramTokenizer` adds `load`, `encode`, and `decode` methods with
+the same public shape. Its encoding behavior deliberately remains different
+from TVA's linguistic bigram baseline: overlapping candidates are resolved by
+the handwriting-utility dynamic program, not greedy left-to-right matching.
+The richer connectivity statistics and provenance remain in the same model
+JSON. Re-run the build command above to upgrade a model created before these
+mappings were added.
+
 If any selected processed line image is absent, prepare that exact line using
 the same recorded IAM/PyLaia preprocessing procedure as the smoke run. Do not
 replace a difficult or failed selected line with another line; record missing
