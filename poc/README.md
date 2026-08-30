@@ -136,6 +136,12 @@ JPEG settings. Existing identical crops are reused; different files and
 different manifests are never overwritten. The manifest records source XML,
 source page image, crop, and output SHA-256 digests plus the Pillow version.
 
+The upstream `datasets/READ.py` originally imported `READ_SEM_TOKENS` from the
+external FasterDAN package even though that name was unused. The READ branch
+removes only that unused import, so localization does not require installing an
+unrelated legacy training stack. READ transforms, charset handling, model
+construction, checkpoint loading, thresholding, and NMS remain unchanged.
+
 ## Milestone run on Linux/WSL + RTX 4060
 
 First follow [the Conda environment guide](../environment/conda/README.md), then

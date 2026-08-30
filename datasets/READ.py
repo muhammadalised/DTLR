@@ -14,7 +14,9 @@ from util.slconfig import SLConfig
 from datasets import build_dataset
 from util.visualizer import COCOVisualizer
 from fontTools.ttLib import TTFont
-from faster_dan.Datasets.dataset_formatters.read2016_formatter import SEM_TOKENS as READ_SEM_TOKENS
+# READ_SEM_TOKENS was formerly imported from FasterDAN here but never used by
+# this dataset, its transforms, or DTLR model construction. Keeping that import
+# made READ inference fail unless an unrelated legacy package was installed.
 
 
 
