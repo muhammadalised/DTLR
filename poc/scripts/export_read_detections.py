@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 
 import torch
+import torch.nn as nn
 from PIL import Image
 
 REPO = Path(__file__).resolve().parents[2]
@@ -16,6 +17,7 @@ sys.path.insert(0, str(REPO))
 
 from datasets.READ import make_coco_transforms  # noqa: E402
 from finetuning import build_model_main  # noqa: E402
+from poc.dtlr_poc.checkpoint_structure import classify_decoder_class_embed  # noqa: E402
 from poc.dtlr_poc.detection_resume import read_jsonl_for_resume, validate_resume_prefix  # noqa: E402
 from poc.dtlr_poc.read_dataset import (  # noqa: E402
     TRANSCRIPTION_NORMALIZATION,
@@ -67,6 +69,20 @@ def main() -> int:
     if "¬" in charset:
         raise SystemExit("READ charset unexpectedly contains the removed continuation marker '¬'")
 
+    config = SLConfig.fromfile(str(REPO / "config/Latin_CTC.py"))
+    config.dataset_file = "READ"
+    config.charset = charset
+    config.num_classes = len(charset)
+    config.device = "cuda:0"
+    config.fix_size = False
+
+    checkpoint = torch.load(args.checkpoint, map_location="cpu")
+    if "model" not in checkpoint:
+        raise KeyError("checkpoint has no 'model' state dictionary")
+    checkpoint_structure = classify_decoder_class_embed(
+        checkpoint["model"].keys(), config.dec_layers
+    )
+
     commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=REPO, text=True).strip()
     checkpoint_sha256 = sha256_file(args.checkpoint)
     selection_provenance = None
@@ -90,10 +106,11 @@ def main() -> int:
         )
     existing = read_jsonl_for_resume(args.output) if args.resume else []
     expected = {
-        "schema_version": "dtlr.detections.v2",
+        "schema_version": "dtlr.detections.v3",
         "dataset": "READ",
         "split": args.split,
         "checkpoint": {"kind": args.checkpoint_kind, "sha256": checkpoint_sha256},
+        "checkpoint_structure": checkpoint_structure,
         "selection_manifest": selection_provenance,
         "repo_commit": commit,
         "threshold": args.threshold,
@@ -119,18 +136,22 @@ def main() -> int:
         print(f"Detection export already complete: {len(existing)}/{len(examples)} records")
         return 0
 
-    config = SLConfig.fromfile(str(REPO / "config/Latin_CTC.py"))
-    config.dataset_file = "READ"
-    config.charset = charset
-    config.num_classes = len(charset)
-    config.device = "cuda:0"
-    config.fix_size = False
     transform = make_coco_transforms("test", args=config)
 
     model, _, postprocessors = build_model_main(config)
-    checkpoint = torch.load(args.checkpoint, map_location="cpu")
-    if "model" not in checkpoint:
-        raise KeyError("checkpoint has no 'model' state dictionary")
+    if checkpoint_structure["decoder_class_embed"] == "single-linear":
+        weight = checkpoint["model"]["transformer.decoder.class_embed.weight"]
+        bias = checkpoint["model"]["transformer.decoder.class_embed.bias"]
+        expected_shape = (len(charset), model.class_embed[0].in_features)
+        if tuple(weight.shape) != expected_shape or tuple(bias.shape) != (len(charset),):
+            raise ValueError(
+                "READ checkpoint decoder classifier shape does not match the dataset charset "
+                f"and model hidden size: weight={tuple(weight.shape)}, bias={tuple(bias.shape)}, "
+                f"expected={expected_shape}/{(len(charset),)}"
+            )
+        model.transformer.decoder.class_embed = nn.Linear(
+            expected_shape[1], expected_shape[0]
+        )
     incompatible = model.load_state_dict(checkpoint["model"], strict=True)
     if incompatible.missing_keys or incompatible.unexpected_keys:
         raise RuntimeError(str(incompatible))

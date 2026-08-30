@@ -142,6 +142,16 @@ removes only that unused import, so localization does not require installing an
 unrelated legacy training stack. READ transforms, charset handling, model
 construction, checkpoint loading, thresholding, and NMS remain unchanged.
 
+READ checkpoints produced with the repository's `--new_class_embedding`
+fine-tuning path register the decoder classifier as one `Linear` layer, whereas
+a freshly built base DINO model registers an indexed `ModuleList`. The READ
+exporter inspects the checkpoint keys and reconstructs that exact registered
+module layout before loading. It validates the classifier dimensions against
+the READ charset and hidden size, retains `strict=True`, rejects partial or
+ambiguous layouts, and records the recognized layout in every detection row.
+This follows the repository's evaluation path; it does not discard, duplicate,
+or reinterpret checkpoint parameters.
+
 ## Milestone run on Linux/WSL + RTX 4060
 
 First follow [the Conda environment guide](../environment/conda/README.md), then
