@@ -13,14 +13,14 @@ REPO = Path(__file__).resolve().parents[2]
 
 
 class QARendererTests(unittest.TestCase):
-    def run_renderer(self, root, record):
+    def run_renderer(self, root, record, script="render_iam_qa.py"):
         detections = root / "detections.jsonl"
         detections.write_text(json.dumps(record) + "\n", encoding="utf-8")
         output = root / "qa"
         subprocess.run(
             [
                 sys.executable,
-                str(REPO / "poc/scripts/render_iam_qa.py"),
+                str(REPO / "poc/scripts" / script),
                 "--detections",
                 str(detections),
                 "--data-root",
@@ -56,6 +56,7 @@ class QARendererTests(unittest.TestCase):
             output, manifest = self.run_renderer(root, record)
             pair = manifest["lines"][0]["pairs"][0]
             self.assertEqual(manifest["schema_version"], "dtlr.qa-manifest.v6")
+            self.assertEqual(manifest["dataset"], "IAM")
             self.assertEqual(manifest["pair_count"], 1)
             self.assertEqual(manifest["usable_pair_count"], 1)
             self.assertEqual(manifest["primary_connectivity_method"], "dominant-core-v3")
@@ -67,6 +68,28 @@ class QARendererTests(unittest.TestCase):
             self.assertEqual(pair["shared_component_count"], 1)
             self.assertTrue((output / pair["image"]).is_file())
             self.assertIn("IAM pair-level QA", (output / "index.html").read_text(encoding="utf-8"))
+
+    def test_read_wrapper_labels_the_same_qa_behavior_as_read(self):
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            image = np.full((24, 48), 255, dtype=np.uint8)
+            image[12, 5:43] = 0
+            Image.fromarray(image).save(root / "line.png")
+            record = {
+                "dataset": "READ",
+                "split": "valid",
+                "line_id": "READ-valid-000001",
+                "transcription": "ab",
+                "image_relpath": "line.png",
+                "detections": [
+                    {"predicted_char": "a", "score": 0.9, "box_xyxy": [3, 4, 27, 20]},
+                    {"predicted_char": "b", "score": 0.9, "box_xyxy": [22, 4, 45, 20]},
+                ],
+            }
+            output, manifest = self.run_renderer(root, record, "render_read_qa.py")
+            self.assertEqual(manifest["dataset"], "READ")
+            self.assertTrue(manifest["lines"][0]["pairs"][0]["connected"])
+            self.assertIn("READ pair-level QA", (output / "index.html").read_text(encoding="utf-8"))
 
     def test_inverted_exclusive_core_is_omitted_without_changing_evidence(self):
         with TemporaryDirectory() as directory:

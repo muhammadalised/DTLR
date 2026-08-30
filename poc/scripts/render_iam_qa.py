@@ -223,7 +223,7 @@ def render_pair_crops(
     return results
 
 
-def write_review_index(lines: list[dict], output: Path) -> None:
+def write_review_index(lines: list[dict], output: Path, dataset: str = "IAM") -> None:
     sections = []
     for line in lines:
         cards = []
@@ -251,7 +251,7 @@ def write_review_index(lines: list[dict], output: Path) -> None:
         )
     document = f"""<!doctype html>
 <meta charset="utf-8">
-<title>IAM pair-level QA</title>
+<title>{html.escape(dataset)} pair-level QA</title>
 <style>
 body {{ font: 14px system-ui, sans-serif; margin: 20px; }}
 summary {{ cursor: pointer; font-size: 18px; font-weight: 600; margin: 12px 0; }}
@@ -262,7 +262,7 @@ article.unusable {{ border-color: #d88900; }}
 h3 {{ margin: 3px 0; }}
 img {{ width: min(100%, 960px); image-rendering: auto; }}
 </style>
-<h1>IAM pair-level QA</h1>
+<h1>{html.escape(dataset)} pair-level QA</h1>
 <p>The primary method is dominant-core-v3. Magenta is the unique largest
 component in both raster-safe cores. When disconnected, blue is dominant in the
 left core and orange in the right. Rejected core-v2.1, core-v2, and box-v1
@@ -360,6 +360,10 @@ def main() -> int:
     parser.add_argument("--ink-threshold", type=int)
     args = parser.parse_args()
     records = [json.loads(line) for line in args.detections.read_text(encoding="utf-8").splitlines() if line]
+    datasets = sorted({record.get("dataset", "unknown") for record in records})
+    if len(datasets) != 1:
+        raise SystemExit(f"QA input must contain exactly one dataset, found: {datasets}")
+    dataset = datasets[0]
     args.output_dir.mkdir(parents=True, exist_ok=True)
     lines = []
     for record in records:
@@ -371,10 +375,11 @@ def main() -> int:
         )
         line["pairs"] = render_pair_crops(record, args.data_root, args.output_dir, args.ink_threshold)
         lines.append(line)
-    write_review_index(lines, args.output_dir / "index.html")
+    write_review_index(lines, args.output_dir / "index.html", dataset)
     manifest = {
         "schema_version": "dtlr.qa-manifest.v6",
         "source": str(args.detections),
+        "dataset": dataset,
         "line_count": len(lines),
         "pair_count": sum(len(line["pairs"]) for line in lines),
         "usable_pair_count": sum(pair["usable"] for line in lines for pair in line["pairs"]),

@@ -1,9 +1,11 @@
 # DTLR → TVA bigram POC (August 28)
 
 This directory is an additive adapter around upstream DTLR. It does not change
-the model, decoding, IAM splits, or threshold/NMS behavior. The initial scope is
-IAM line images and within-token adjacent character pairs (pairs touching
-whitespace are excluded).
+the model, decoding, dataset splits, or threshold/NMS behavior. The first
+completed scope is IAM line images and within-token adjacent character pairs
+(pairs touching whitespace are excluded). READ 2016 support follows the same
+frozen alignment, binarization, CCL, and `dominant-core-v3` behavior so that the
+German run tests transfer rather than introducing a new connectivity method.
 
 ## Scientific contract
 
@@ -47,8 +49,9 @@ milestone is verified only by an **IAM-finetuned** checkpoint. Every detection
 record contains the declared kind and SHA-256 digest; preserve the original
 download filename and source URL in the run notes.
 
-The same distinction will later apply to READ: `german-pretrained` is not a
-`read-finetuned` checkpoint. READ is intentionally out of this first milestone.
+The same distinction applies to READ: `german-pretrained` is synthetic German
+pretraining, while `read-finetuned` has completed the repository's READ
+fine-tuning procedure. Only the latter verifies READ character localization.
 
 ## Expected external layout
 
@@ -58,14 +61,63 @@ Use absolute Linux/WSL paths outside the repository:
 ~/dtlr-data/
   IAM_new/labels.pkl
   IAM_new/data/imgs/lines/*.jpg
+  READ_2016/labels.pkl
+  READ_2016/images/{train,valid,test}/*.jpeg
 ~/dtlr-weights/
   finetuned/IAM/checkpoint.pth
+  finetuned/READ/checkpoint.pth
 ~/dtlr-output/
 ```
 
 The upstream repository already tracks a small IAM `labels.pkl`; prefer the copy
 distributed with the exact image preprocessing used for the run and record its
 hash. Dataset images, checkpoints, detections, and exports must stay outside Git.
+
+READ's distributed `labels.pkl` records archive-relative image paths, while the
+upstream loader constructs a second numeric filename convention. The POC READ
+adapter checks both layouts and records `image_path_source` in every detection.
+If both paths exist but contain different files, it stops instead of silently
+choosing one. The upstream loader removes the `¬` line-continuation marker before
+encoding. READ exports preserve `raw_transcription`, use the equivalently
+normalized `transcription` for alignment, and pin that rule in the selection and
+detection provenance.
+
+## READ validation gate
+
+Do not begin with the full 8,367-line READ training split. Freeze an
+outcome-blind 32-line validation sample and run the READ-finetuned checkpoint:
+
+```bash
+python poc/scripts/freeze_read_selection.py \
+  --data-root "${DTLR_DATA_ROOT}" \
+  --split valid --count 32 --seed read-dominant-core-v3-transfer-20260830 \
+  --output "${DTLR_OUTPUT_ROOT}/read-valid-32/selection.json"
+
+python poc/scripts/export_read_detections.py \
+  --data-root "${DTLR_DATA_ROOT}" \
+  --checkpoint "${DTLR_WEIGHTS_ROOT}/finetuned/READ/checkpoint.pth" \
+  --checkpoint-kind read-finetuned --split valid \
+  --selection-manifest "${DTLR_OUTPUT_ROOT}/read-valid-32/selection.json" \
+  --threshold 0.3 --nms 0.5 \
+  --output "${DTLR_OUTPUT_ROOT}/read-valid-32/detections.jsonl"
+
+python poc/scripts/build_bigram_evidence.py \
+  --detections "${DTLR_OUTPUT_ROOT}/read-valid-32/detections.jsonl" \
+  --data-root "${DTLR_DATA_ROOT}" \
+  --output-dir "${DTLR_OUTPUT_ROOT}/read-valid-32/bigrams-dominant-core-v3"
+
+python poc/scripts/render_read_qa.py \
+  --detections "${DTLR_OUTPUT_ROOT}/read-valid-32/detections.jsonl" \
+  --data-root "${DTLR_DATA_ROOT}" \
+  --output-dir "${DTLR_OUTPUT_ROOT}/read-valid-32/qa-dominant-core-v3"
+```
+
+The evidence builder is dataset-generic and retains `dataset=READ` in every
+row and aggregate key. The QA renderer changes only the dataset label; it uses
+the same frozen IAM-reviewed CCL implementation. Review READ localization,
+alignment, diacritics, historical characters, abstentions, and v2.1/v3
+disagreements before freezing a READ decision or running the training split.
+Do not pool the 32-line validation evidence into the future tokenizer model.
 
 ## Milestone run on Linux/WSL + RTX 4060
 
