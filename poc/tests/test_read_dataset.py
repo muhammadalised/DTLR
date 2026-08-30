@@ -6,6 +6,8 @@ import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
+from PIL import Image
+
 from dtlr_poc.read_dataset import (
     all_examples,
     build_read_selection,
@@ -101,6 +103,57 @@ class ReadDatasetTests(unittest.TestCase):
         self.assertEqual(selection["dataset"], "READ")
         self.assertEqual(selection["requested_count"], 2)
         self.assertEqual(len(selection["lines"]), 2)
+
+    def test_prepares_selected_page_xml_crops_reproducibly(self):
+        data_root = self.root / "data-root"
+        labels_root = data_root / "READ_2016"
+        labels_root.mkdir(parents=True)
+        labels_root.joinpath("labels.pkl").write_bytes(self.labels_path.read_bytes())
+        selection = build_read_selection(labels_root / "labels.pkl", "valid", 2, "crop-seed")
+        selection_path = self.root / "selection.json"
+        selection_path.write_text(json.dumps(selection), encoding="utf-8")
+
+        raw_root = self.root / "raw"
+        split_root = raw_root / "PublicData/Validation"
+        xml_root = split_root / "page/page"
+        image_root = split_root / "Images"
+        xml_root.mkdir(parents=True)
+        image_root.mkdir(parents=True)
+        namespace = "http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15"
+        (xml_root / "Seite0001.xml").write_text(
+            f'''<PcGts xmlns="{namespace}"><Page imageWidth="20" imageHeight="12">
+            <TextRegion><TextLine id="line-0"><Coords points="1,2 8,2 8,6 1,6"/>
+            <TextEquiv><Unicode>Bestett¬ </Unicode></TextEquiv></TextLine>
+            <TextLine id="line-1"><Coords points="9,3 18,3 18,9 9,9"/>
+            <TextEquiv><Unicode>Rāth</Unicode></TextEquiv></TextLine></TextRegion>
+            </Page></PcGts>''',
+            encoding="utf-8",
+        )
+        Image.new("RGB", (20, 12), "white").save(image_root / "Seite0001.JPG")
+        manifest_path = self.root / "preprocessing.json"
+        command = [
+            sys.executable,
+            str(REPO / "poc/scripts/prepare_read_selection_images.py"),
+            "--selection-manifest", str(selection_path),
+            "--raw-root", str(raw_root),
+            "--data-root", str(data_root),
+            "--output-manifest", str(manifest_path),
+        ]
+        first = subprocess.run(command, check=True, capture_output=True, text=True)
+        second = subprocess.run(command, check=True, capture_output=True, text=True)
+        self.assertIn('"created_this_run": 2', first.stdout)
+        self.assertIn('"existing_this_run": 2', second.stdout)
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        self.assertEqual(manifest["schema_version"], "dtlr.read-preprocessing.v1")
+        self.assertEqual(manifest["record_count"], 2)
+        for row in manifest["records"]:
+            self.assertTrue((data_root / row["output"]).is_file())
+
+        first_output = data_root / manifest["records"][0]["output"]
+        first_output.write_bytes(b"different")
+        failed = subprocess.run(command, capture_output=True, text=True)
+        self.assertNotEqual(failed.returncode, 0)
+        self.assertIn("refusing to overwrite a different READ line crop", failed.stderr)
 
 
 if __name__ == "__main__":

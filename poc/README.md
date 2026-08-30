@@ -93,6 +93,12 @@ python poc/scripts/freeze_read_selection.py \
   --split valid --count 32 --seed read-dominant-core-v3-transfer-20260830 \
   --output "${DTLR_OUTPUT_ROOT}/read-valid-32/selection.json"
 
+python poc/scripts/prepare_read_selection_images.py \
+  --selection-manifest "${DTLR_OUTPUT_ROOT}/read-valid-32/selection.json" \
+  --raw-root "/home/artellisys/dtlr-data/read-raw-2016" \
+  --data-root "${DTLR_DATA_ROOT}" \
+  --output-manifest "${DTLR_OUTPUT_ROOT}/read-valid-32/preprocessing.json"
+
 python poc/scripts/export_read_detections.py \
   --data-root "${DTLR_DATA_ROOT}" \
   --checkpoint "${DTLR_WEIGHTS_ROOT}/finetuned/READ/checkpoint.pth" \
@@ -118,6 +124,17 @@ the same frozen IAM-reviewed CCL implementation. Review READ localization,
 alignment, diacritics, historical characters, abstentions, and v2.1/v3
 disagreements before freezing a READ decision or running the training split.
 Do not pool the 32-line validation evidence into the future tokenizer model.
+
+The READ preparation command ignores split-level `doc.xml`, pairs sorted
+`SeiteNNNN.xml` PAGE annotations with the same-stem JPG, and verifies the full
+line order and transcription of every selected page against `labels.pkl`. It
+reproduces the formatter's seven documented missing-transcription corrections
+and strips only surrounding XML whitespace for verification; GT identity still
+comes from `labels.pkl`. Each crop is the clipped, inclusive axis-aligned bounds
+of the PAGE `TextLine/Coords` polygon and is encoded with explicitly recorded
+JPEG settings. Existing identical crops are reused; different files and
+different manifests are never overwritten. The manifest records source XML,
+source page image, crop, and output SHA-256 digests plus the Pillow version.
 
 ## Milestone run on Linux/WSL + RTX 4060
 
