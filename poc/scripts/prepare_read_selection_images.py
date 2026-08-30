@@ -52,7 +52,7 @@ def direct_child(element: ET.Element, name: str) -> ET.Element | None:
     return next((child for child in element if local_name(child) == name), None)
 
 
-def page_line_index(example: dict, split: str) -> tuple[int, int]:
+def page_and_record_index(example: dict, split: str) -> tuple[int, int]:
     match = LINE_PATH.fullmatch(example["label_image_relpath"])
     if match is None or match.group(1) != split:
         raise ValueError(f"unexpected READ line path: {example['label_image_relpath']}")
@@ -132,20 +132,29 @@ def main() -> int:
     all_split_examples = all_examples(labels_path, split)
     by_page: dict[int, list[dict]] = {}
     for example in all_split_examples:
-        page_index, line_index = page_line_index(example, split)
-        by_page.setdefault(page_index, []).append({**example, "page_line_index": line_index})
+        page_index, path_record_index = page_and_record_index(example, split)
+        if path_record_index != example["idx"]:
+            raise ValueError(
+                f"labels.pkl path record index differs from idx for {example['id']}"
+            )
+        by_page.setdefault(page_index, []).append(example)
     for page_index, rows in by_page.items():
-        rows.sort(key=lambda row: row["page_line_index"])
-        if [row["page_line_index"] for row in rows] != list(range(len(rows))):
-            raise ValueError(f"non-contiguous labels.pkl line indices on {split} page {page_index}")
+        rows.sort(key=lambda row: row["idx"])
+        for page_line_index, row in enumerate(rows):
+            row["page_line_index"] = page_line_index
     if len(xml_paths) != len(by_page):
         raise ValueError(
             f"PAGE XML count {len(xml_paths)} differs from labels.pkl page count {len(by_page)}"
         )
 
     selected_by_page: dict[int, list[tuple[dict, int]]] = {}
+    selected_positions = {
+        row["id"]: (page_index, row["page_line_index"])
+        for page_index, rows in by_page.items()
+        for row in rows
+    }
     for example in examples:
-        page_index, line_index = page_line_index(example, split)
+        page_index, line_index = selected_positions[example["id"]]
         selected_by_page.setdefault(page_index, []).append((example, line_index))
 
     output_records = []

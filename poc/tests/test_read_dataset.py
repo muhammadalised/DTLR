@@ -108,8 +108,22 @@ class ReadDatasetTests(unittest.TestCase):
         data_root = self.root / "data-root"
         labels_root = data_root / "READ_2016"
         labels_root.mkdir(parents=True)
-        labels_root.joinpath("labels.pkl").write_bytes(self.labels_path.read_bytes())
-        selection = build_read_selection(labels_root / "labels.pkl", "valid", 2, "crop-seed")
+        labels = pickle.loads(self.labels_path.read_bytes())
+        labels["ground_truth"]["valid"].update({
+            2: {
+                "idx": 2,
+                "path": "READ_2016/images/valid/valid_1_2.jpeg",
+                "text": "Second",
+            },
+            3: {
+                "idx": 3,
+                "path": "READ_2016/images/valid/valid_1_3.jpeg",
+                "text": "page",
+            },
+        })
+        labels["charset"] = sorted({ord(char) for row in labels["ground_truth"]["valid"].values() for char in row["text"]})
+        labels_root.joinpath("labels.pkl").write_bytes(pickle.dumps(labels))
+        selection = build_read_selection(labels_root / "labels.pkl", "valid", 4, "crop-seed")
         selection_path = self.root / "selection.json"
         selection_path.write_text(json.dumps(selection), encoding="utf-8")
 
@@ -130,6 +144,16 @@ class ReadDatasetTests(unittest.TestCase):
             encoding="utf-8",
         )
         Image.new("RGB", (20, 12), "white").save(image_root / "Seite0001.JPG")
+        (xml_root / "Seite0002.xml").write_text(
+            f'''<PcGts xmlns="{namespace}"><Page imageWidth="20" imageHeight="12">
+            <TextRegion><TextLine id="line-2"><Coords points="1,2 8,2 8,6 1,6"/>
+            <TextEquiv><Unicode>Second</Unicode></TextEquiv></TextLine>
+            <TextLine id="line-3"><Coords points="9,3 18,3 18,9 9,9"/>
+            <TextEquiv><Unicode>page</Unicode></TextEquiv></TextLine></TextRegion>
+            </Page></PcGts>''',
+            encoding="utf-8",
+        )
+        Image.new("RGB", (20, 12), "white").save(image_root / "Seite0002.JPG")
         manifest_path = self.root / "preprocessing.json"
         command = [
             sys.executable,
@@ -141,11 +165,11 @@ class ReadDatasetTests(unittest.TestCase):
         ]
         first = subprocess.run(command, check=True, capture_output=True, text=True)
         second = subprocess.run(command, check=True, capture_output=True, text=True)
-        self.assertIn('"created_this_run": 2', first.stdout)
-        self.assertIn('"existing_this_run": 2', second.stdout)
+        self.assertIn('"created_this_run": 4', first.stdout)
+        self.assertIn('"existing_this_run": 4', second.stdout)
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         self.assertEqual(manifest["schema_version"], "dtlr.read-preprocessing.v1")
-        self.assertEqual(manifest["record_count"], 2)
+        self.assertEqual(manifest["record_count"], 4)
         for row in manifest["records"]:
             self.assertTrue((data_root / row["output"]).is_file())
 
