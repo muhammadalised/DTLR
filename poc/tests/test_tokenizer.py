@@ -3,7 +3,12 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from dtlr_poc.tokenizer import HandwritingBigramTokenizer, build_model, tokenize
+from dtlr_poc.tokenizer import (
+    HandwritingBigramTokenizer,
+    build_combined_model,
+    build_model,
+    tokenize,
+)
 
 
 def score(pair, count, rate, split="train"):
@@ -16,6 +21,12 @@ def score(pair, count, rate, split="train"):
         "n_exact_alignment": count,
         "exact_alignment_connected_rate": rate,
     }
+
+
+def dataset_score(dataset, pair, count, rate, split="train"):
+    row = score(pair, count, rate, split)
+    row["dataset"] = dataset
+    return row
 
 
 class TokenizerTests(unittest.TestCase):
@@ -96,6 +107,74 @@ class TokenizerTests(unittest.TestCase):
             tokenizer = HandwritingBigramTokenizer()
             tokenizer.load(path)
         self.assertEqual(tokenizer.decode(tokenizer.encode("ab ab")), "ab ab")
+
+    def test_combined_model_pools_integer_observations_and_retains_sources(self):
+        model = build_combined_model(
+            {
+                "IAM": [
+                    dataset_score("IAM", "th", 20, 0.8),
+                    dataset_score("IAM", "ab", 10, 0.4),
+                ],
+                "READ": [
+                    dataset_score("READ", "th", 10, 0.4),
+                    dataset_score("READ", "äß", 25, 0.8),
+                ],
+            },
+            {"IAM": "iam-hash", "READ": "read-hash"},
+            minimum_count=20,
+            rate_threshold=0.5,
+        )
+        vocabulary = {row["token"]: row for row in model["vocabulary"]}
+        self.assertEqual(set(vocabulary), {"th", "äß"})
+        self.assertEqual(vocabulary["th"]["n_exact_alignment"], 30)
+        self.assertEqual(vocabulary["th"]["n_exact_alignment_connected"], 20)
+        self.assertAlmostEqual(vocabulary["th"]["utility"], 2 / 3)
+        self.assertEqual(
+            vocabulary["th"]["dataset_statistics"]["IAM"]["n_exact_alignment"], 20
+        )
+        self.assertEqual(model["source_scores"]["READ"]["sha256"], "read-hash")
+        self.assertEqual(model["model_version"], "iam-read-combined-v1")
+
+    def test_combined_model_rejects_nontraining_or_boundary_changing_normalization(self):
+        with self.assertRaisesRegex(ValueError, "train scores only"):
+            build_combined_model(
+                {
+                    "IAM": [dataset_score("IAM", "th", 20, 0.8, split="valid")],
+                    "READ": [dataset_score("READ", "th", 20, 0.8)],
+                },
+                {"IAM": "iam", "READ": "read"},
+                20,
+                0.5,
+            )
+        with self.assertRaisesRegex(ValueError, "changes a score pair boundary"):
+            build_combined_model(
+                {
+                    "IAM": [
+                        dataset_score("IAM", "A\N{COMBINING RING ABOVE}", 20, 0.8)
+                    ],
+                    "READ": [dataset_score("READ", "th", 20, 0.8)],
+                },
+                {"IAM": "iam", "READ": "read"},
+                20,
+                0.5,
+            )
+
+    def test_combined_tokenizer_normalizes_input_explicitly(self):
+        model = build_combined_model(
+            {
+                "IAM": [dataset_score("IAM", "üb", 20, 0.8)],
+                "READ": [dataset_score("READ", "üb", 20, 0.9)],
+            },
+            {"IAM": "iam", "READ": "read"},
+            20,
+            0.5,
+        )
+        tokenizer = HandwritingBigramTokenizer(model)
+        result = tokenizer.segment("u\N{COMBINING DIAERESIS}b")
+        self.assertEqual(result["text"], "üb")
+        self.assertEqual(result["input_text"], "u\N{COMBINING DIAERESIS}b")
+        self.assertEqual(result["tokens"], ["üb"])
+        self.assertEqual(tokenizer.decode(tokenizer.encode("u\N{COMBINING DIAERESIS}b")), "üb")
 
 
 if __name__ == "__main__":

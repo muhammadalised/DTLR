@@ -373,6 +373,39 @@ The richer connectivity statistics and provenance remain in the same model
 JSON. Re-run the build command above to upgrade a model created before these
 mappings were added.
 
+## Combined IAM + READ tokenizer v1
+
+After separately freezing and exporting the complete IAM and READ **training**
+splits, build the combined model from their score files. Validation and test
+scores are rejected. Exact-alignment connected and total observation counts
+are pooled per pair; dataset-specific counts and rates remain attached to each
+eligible vocabulary entry so language contributions are auditable.
+Because score schema v5 stores count and rate, the connected count is recovered
+as `round(count * rate)` and accepted only when it is integral within a strict
+floating-point tolerance. The recovery rule is recorded in the model.
+
+```bash
+python poc/scripts/build_combined_bigram_tokenizer.py \
+  --iam-scores "${DTLR_OUTPUT_ROOT}/iam-train-full/bigrams-dominant-core-v3/bigram_scores.json" \
+  --read-scores "${DTLR_OUTPUT_ROOT}/read-train-full/bigrams-dominant-core-v3/bigram_scores.json" \
+  --minimum-count 20 --rate-threshold 0.5 --pair-policy letters-only \
+  --unicode-normalization NFC \
+  --output "${DTLR_OUTPUT_ROOT}/combined-iam-read-v1/model.json"
+
+python poc/scripts/tokenize_iam_bigrams.py \
+  --model "${DTLR_OUTPUT_ROOT}/combined-iam-read-v1/model.json" \
+  --text "the handwriting" \
+  --text "für größere Wörter" \
+  --output "${DTLR_OUTPUT_ROOT}/combined-iam-read-v1/examples.json"
+```
+
+The model records NFC as an input-text policy rather than silently applying an
+unreported transformation. Construction fails if normalization would turn a
+two-code-point score pair into a different number of code points, because such
+a change requires regenerating evidence at the intended character boundaries.
+The pooled count/rate thresholds remain a provisional vocabulary policy, not a
+held-out performance claim.
+
 If any selected processed line image is absent, prepare that exact line using
 the same recorded IAM/PyLaia preprocessing procedure as the smoke run. Do not
 replace a difficult or failed selected line with another line; record missing
