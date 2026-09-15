@@ -19,8 +19,10 @@ the paper is available on [arXiv](https://arxiv.org/pdf/2409.17095).
 
 > **August 28 TVA proof of concept:** the additive IAM bigram adapter and the
 > reproducible Linux/WSL Conda environment are documented in
-> [`poc/README.md`](poc/README.md). CUDA builds are intentionally unsupported on
-> Apple Silicon.
+> [`poc/README.md`](poc/README.md). A concise project history, verified results,
+> script chronology, and continuation guide are in
+> [`PROJECT_HANDOFF.md`](PROJECT_HANDOFF.md). CUDA builds are intentionally
+> unsupported on Apple Silicon.
 
 This repository builds on the code for [DINO-DETR](https://github.com/IDEA-Research/DINO), the official implementation of the paper "[DINO: DETR with Improved DeNoising Anchor Boxes for End-to-End Object Detection](https://arxiv.org/abs/2203.03605)". We present a model that adapts DINO-DETR for text recognition as a detection and recognition task. The model is pretrained on synthetic data using the same loss as DINO-DETR and then fine-tuned on a real dataset with CTC loss.
 <p align="center">
