@@ -3,9 +3,14 @@
 from dataclasses import dataclass
 import json
 from pathlib import Path
+import unicodedata
 
 
 MODEL_SCHEMA = "dtlr.handwriting-bigram-tokenizer.v1"
+FROZEN_IAM_MODEL_VERSION = "iam-english-handwriting-bigram-v1"
+FROZEN_IAM_SCORES_SHA256 = "45c86a9f703ebc3684563ec2a840e7c34241aa76e84d692be46cf11bfec27055"
+FROZEN_IAM_MANIFEST_SHA256 = "82cb95a14e71ab5b70c868ca1676b3f628552fabac395fbd30039fc7798bf190"
+FROZEN_IAM_SOURCE_MODEL_SHA256 = "36db922860cbd501a6c5a1297dbf7d998abdbe1a337513acb00b44e74fbd9334"
 
 
 def pair_allowed(pair: str, policy: str) -> bool:
@@ -101,6 +106,85 @@ def build_model(
     }
 
 
+def build_frozen_iam_artifact(
+    scores: list[dict],
+    manifest: dict,
+    source_model: dict,
+    source_scores_sha256: str,
+    source_manifest_sha256: str,
+    source_model_sha256: str,
+) -> dict:
+    """Reproduce and formalize the pinned IAM-only experimental vocabulary.
+
+    This freeze fixes a pre-downstream experiment configuration. It does not
+    claim that the provisional count/rate thresholds are statistically optimal.
+    """
+    expected_hashes = {
+        "score file": (source_scores_sha256, FROZEN_IAM_SCORES_SHA256),
+        "evidence manifest": (source_manifest_sha256, FROZEN_IAM_MANIFEST_SHA256),
+        "source model": (source_model_sha256, FROZEN_IAM_SOURCE_MODEL_SHA256),
+    }
+    for source, (actual, expected) in expected_hashes.items():
+        if actual != expected:
+            raise ValueError(f"unexpected {source} SHA-256: {actual}; expected {expected}")
+
+    if manifest.get("schema_version") != "dtlr.export-manifest.v5":
+        raise ValueError("unsupported IAM evidence manifest schema")
+    if manifest.get("datasets") != ["IAM"] or manifest.get("splits") != ["train"]:
+        raise ValueError("frozen artifact requires IAM train as its sole evidence source")
+    if manifest.get("primary_connectivity_method") != "dominant-core-v3":
+        raise ValueError("IAM evidence manifest does not use dominant-core-v3")
+    if manifest.get("score_count") != len(scores):
+        raise ValueError("IAM evidence manifest score count does not match the score file")
+
+    reconstructed = build_model(
+        scores,
+        source_sha256=source_scores_sha256,
+        minimum_count=20,
+        rate_threshold=0.5,
+        pair_policy="letters-only",
+        required_characters=(" ",),
+    )
+    if reconstructed != source_model:
+        raise ValueError("pinned IAM source model is not exactly reconstructible from the scores")
+    if reconstructed["eligible_bigram_count"] != 145 or reconstructed["size"] != 222:
+        raise ValueError("pinned IAM vocabulary counts differ from the audited 145/222 counts")
+
+    artifact = dict(reconstructed)
+    artifact.update({
+        "model_version": FROZEN_IAM_MODEL_VERSION,
+        "status": "frozen-experiment-policy",
+        "unicode_normalization": "NFC",
+        "evidence_provenance": {
+            "sole_dataset": "IAM",
+            "sole_split": "train",
+            "connectivity_method": "dominant-core-v3",
+            "line_count": manifest["line_count"],
+            "evidence_count": manifest["evidence_count"],
+            "score_count": manifest["score_count"],
+            "source_scores_sha256": source_scores_sha256,
+            "source_manifest_sha256": source_manifest_sha256,
+            "source_model_sha256": source_model_sha256,
+        },
+        "reconstruction": {
+            "source_model_exact_match": True,
+            "deterministic_order": "blank, Unicode-sorted singletons, token-sorted eligible bigrams",
+        },
+        "downstream_contract": {
+            "vocabulary_selection": "frozen from IAM train handwriting evidence only",
+            "reference_segmentation": "maximum-total-utility-non-overlapping-v1",
+            "task_alphabet": "consumer responsibility",
+            "segmentation_policy": "consumer responsibility; must be declared separately",
+        },
+        "note": (
+            "Frozen IAM-only experiment policy. The 20-observation and 0.5-rate thresholds "
+            "were provisional demonstration settings and are not a held-out optimality claim. "
+            "No downstream data or results were used to select or validate the bigrams."
+        ),
+    })
+    return artifact
+
+
 class HandwritingBigramTokenizer:
     """TVA-familiar tokenizer interface with handwriting-aware DP segmentation.
 
@@ -153,6 +237,11 @@ class HandwritingBigramTokenizer:
     def segment(self, text: str) -> dict:
         if not self.model:
             raise ValueError("Tokenizer not trained or loaded.")
+        normalization = self.model.get("unicode_normalization")
+        if normalization is not None:
+            if normalization != "NFC":
+                raise ValueError(f"unsupported Unicode normalization: {normalization}")
+            text = unicodedata.normalize(normalization, text)
         return tokenize(text, self.model)
 
     def encode(self, text: str) -> list[int]:

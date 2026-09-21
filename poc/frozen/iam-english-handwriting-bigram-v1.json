@@ -1,0 +1,1368 @@
+{
+  "schema_version": "dtlr.handwriting-bigram-tokenizer.v1",
+  "status": "frozen-experiment-policy",
+  "dataset": "IAM",
+  "training_split": "train",
+  "connectivity_method": "dominant-core-v3",
+  "score_field": "exact_alignment_connected_rate",
+  "count_field": "n_exact_alignment",
+  "blank_token": "",
+  "blank_id": 0,
+  "source_scores_sha256": "45c86a9f703ebc3684563ec2a840e7c34241aa76e84d692be46cf11bfec27055",
+  "policy": {
+    "minimum_count": 20,
+    "rate_threshold": 0.5,
+    "pair_policy": "letters-only",
+    "overlap_resolution": "maximum-total-utility-non-overlapping-v1",
+    "single_character_utility": 0.0,
+    "required_characters": [
+      " "
+    ]
+  },
+  "vocab": {
+    "": 0,
+    " ": 1,
+    "!": 2,
+    "\"": 3,
+    "'": 4,
+    ")": 5,
+    "*": 6,
+    "+": 7,
+    ",": 8,
+    "-": 9,
+    ".": 10,
+    "/": 11,
+    "0": 12,
+    "1": 13,
+    "2": 14,
+    "3": 15,
+    "4": 16,
+    "5": 17,
+    "6": 18,
+    "7": 19,
+    "8": 20,
+    "9": 21,
+    ":": 22,
+    ";": 23,
+    "?": 24,
+    "A": 25,
+    "B": 26,
+    "C": 27,
+    "D": 28,
+    "E": 29,
+    "F": 30,
+    "G": 31,
+    "H": 32,
+    "I": 33,
+    "J": 34,
+    "K": 35,
+    "L": 36,
+    "M": 37,
+    "N": 38,
+    "O": 39,
+    "P": 40,
+    "Q": 41,
+    "R": 42,
+    "S": 43,
+    "T": 44,
+    "U": 45,
+    "V": 46,
+    "W": 47,
+    "X": 48,
+    "Y": 49,
+    "Z": 50,
+    "a": 51,
+    "b": 52,
+    "c": 53,
+    "d": 54,
+    "e": 55,
+    "f": 56,
+    "g": 57,
+    "h": 58,
+    "i": 59,
+    "j": 60,
+    "k": 61,
+    "l": 62,
+    "m": 63,
+    "n": 64,
+    "o": 65,
+    "p": 66,
+    "q": 67,
+    "r": 68,
+    "s": 69,
+    "t": 70,
+    "u": 71,
+    "v": 72,
+    "w": 73,
+    "x": 74,
+    "y": 75,
+    "z": 76,
+    "Af": 77,
+    "Al": 78,
+    "Am": 79,
+    "An": 80,
+    "Ar": 81,
+    "As": 82,
+    "At": 83,
+    "Be": 84,
+    "Ca": 85,
+    "Ce": 86,
+    "Ch": 87,
+    "Co": 88,
+    "De": 89,
+    "En": 90,
+    "Fe": 91,
+    "Ga": 92,
+    "Ge": 93,
+    "He": 94,
+    "Ke": 95,
+    "La": 96,
+    "Le": 97,
+    "Lo": 98,
+    "Mr": 99,
+    "Re": 100,
+    "Ro": 101,
+    "Ru": 102,
+    "Se": 103,
+    "Un": 104,
+    "ab": 105,
+    "af": 106,
+    "ai": 107,
+    "al": 108,
+    "am": 109,
+    "an": 110,
+    "ar": 111,
+    "as": 112,
+    "at": 113,
+    "au": 114,
+    "aw": 115,
+    "ax": 116,
+    "ay": 117,
+    "bb": 118,
+    "be": 119,
+    "bo": 120,
+    "ca": 121,
+    "ce": 122,
+    "ch": 123,
+    "ci": 124,
+    "ck": 125,
+    "cl": 126,
+    "co": 127,
+    "cr": 128,
+    "ct": 129,
+    "cu": 130,
+    "de": 131,
+    "do": 132,
+    "dr": 133,
+    "ds": 134,
+    "du": 135,
+    "ea": 136,
+    "ed": 137,
+    "ee": 138,
+    "ei": 139,
+    "el": 140,
+    "em": 141,
+    "en": 142,
+    "eo": 143,
+    "er": 144,
+    "es": 145,
+    "et": 146,
+    "eu": 147,
+    "ev": 148,
+    "ew": 149,
+    "ex": 150,
+    "ey": 151,
+    "fa": 152,
+    "fe": 153,
+    "ff": 154,
+    "fl": 155,
+    "fo": 156,
+    "fr": 157,
+    "ft": 158,
+    "fu": 159,
+    "ge": 160,
+    "gn": 161,
+    "gr": 162,
+    "ha": 163,
+    "he": 164,
+    "hi": 165,
+    "ho": 166,
+    "hs": 167,
+    "ht": 168,
+    "hu": 169,
+    "hy": 170,
+    "ke": 171,
+    "ki": 172,
+    "kn": 173,
+    "le": 174,
+    "li": 175,
+    "ll": 176,
+    "lu": 177,
+    "ly": 178,
+    "me": 179,
+    "mu": 180,
+    "my": 181,
+    "ne": 182,
+    "nu": 183,
+    "ny": 184,
+    "oe": 185,
+    "of": 186,
+    "oh": 187,
+    "om": 188,
+    "on": 189,
+    "oo": 190,
+    "or": 191,
+    "os": 192,
+    "ou": 193,
+    "pe": 194,
+    "re": 195,
+    "rh": 196,
+    "ro": 197,
+    "rr": 198,
+    "ru": 199,
+    "ry": 200,
+    "se": 201,
+    "ss": 202,
+    "ta": 203,
+    "tc": 204,
+    "te": 205,
+    "th": 206,
+    "to": 207,
+    "tr": 208,
+    "ts": 209,
+    "tt": 210,
+    "tu": 211,
+    "tw": 212,
+    "ty": 213,
+    "ue": 214,
+    "un": 215,
+    "ur": 216,
+    "us": 217,
+    "ut": 218,
+    "we": 219,
+    "ys": 220,
+    "ze": 221
+  },
+  "idx_token": {
+    "0": "",
+    "1": " ",
+    "2": "!",
+    "3": "\"",
+    "4": "'",
+    "5": ")",
+    "6": "*",
+    "7": "+",
+    "8": ",",
+    "9": "-",
+    "10": ".",
+    "11": "/",
+    "12": "0",
+    "13": "1",
+    "14": "2",
+    "15": "3",
+    "16": "4",
+    "17": "5",
+    "18": "6",
+    "19": "7",
+    "20": "8",
+    "21": "9",
+    "22": ":",
+    "23": ";",
+    "24": "?",
+    "25": "A",
+    "26": "B",
+    "27": "C",
+    "28": "D",
+    "29": "E",
+    "30": "F",
+    "31": "G",
+    "32": "H",
+    "33": "I",
+    "34": "J",
+    "35": "K",
+    "36": "L",
+    "37": "M",
+    "38": "N",
+    "39": "O",
+    "40": "P",
+    "41": "Q",
+    "42": "R",
+    "43": "S",
+    "44": "T",
+    "45": "U",
+    "46": "V",
+    "47": "W",
+    "48": "X",
+    "49": "Y",
+    "50": "Z",
+    "51": "a",
+    "52": "b",
+    "53": "c",
+    "54": "d",
+    "55": "e",
+    "56": "f",
+    "57": "g",
+    "58": "h",
+    "59": "i",
+    "60": "j",
+    "61": "k",
+    "62": "l",
+    "63": "m",
+    "64": "n",
+    "65": "o",
+    "66": "p",
+    "67": "q",
+    "68": "r",
+    "69": "s",
+    "70": "t",
+    "71": "u",
+    "72": "v",
+    "73": "w",
+    "74": "x",
+    "75": "y",
+    "76": "z",
+    "77": "Af",
+    "78": "Al",
+    "79": "Am",
+    "80": "An",
+    "81": "Ar",
+    "82": "As",
+    "83": "At",
+    "84": "Be",
+    "85": "Ca",
+    "86": "Ce",
+    "87": "Ch",
+    "88": "Co",
+    "89": "De",
+    "90": "En",
+    "91": "Fe",
+    "92": "Ga",
+    "93": "Ge",
+    "94": "He",
+    "95": "Ke",
+    "96": "La",
+    "97": "Le",
+    "98": "Lo",
+    "99": "Mr",
+    "100": "Re",
+    "101": "Ro",
+    "102": "Ru",
+    "103": "Se",
+    "104": "Un",
+    "105": "ab",
+    "106": "af",
+    "107": "ai",
+    "108": "al",
+    "109": "am",
+    "110": "an",
+    "111": "ar",
+    "112": "as",
+    "113": "at",
+    "114": "au",
+    "115": "aw",
+    "116": "ax",
+    "117": "ay",
+    "118": "bb",
+    "119": "be",
+    "120": "bo",
+    "121": "ca",
+    "122": "ce",
+    "123": "ch",
+    "124": "ci",
+    "125": "ck",
+    "126": "cl",
+    "127": "co",
+    "128": "cr",
+    "129": "ct",
+    "130": "cu",
+    "131": "de",
+    "132": "do",
+    "133": "dr",
+    "134": "ds",
+    "135": "du",
+    "136": "ea",
+    "137": "ed",
+    "138": "ee",
+    "139": "ei",
+    "140": "el",
+    "141": "em",
+    "142": "en",
+    "143": "eo",
+    "144": "er",
+    "145": "es",
+    "146": "et",
+    "147": "eu",
+    "148": "ev",
+    "149": "ew",
+    "150": "ex",
+    "151": "ey",
+    "152": "fa",
+    "153": "fe",
+    "154": "ff",
+    "155": "fl",
+    "156": "fo",
+    "157": "fr",
+    "158": "ft",
+    "159": "fu",
+    "160": "ge",
+    "161": "gn",
+    "162": "gr",
+    "163": "ha",
+    "164": "he",
+    "165": "hi",
+    "166": "ho",
+    "167": "hs",
+    "168": "ht",
+    "169": "hu",
+    "170": "hy",
+    "171": "ke",
+    "172": "ki",
+    "173": "kn",
+    "174": "le",
+    "175": "li",
+    "176": "ll",
+    "177": "lu",
+    "178": "ly",
+    "179": "me",
+    "180": "mu",
+    "181": "my",
+    "182": "ne",
+    "183": "nu",
+    "184": "ny",
+    "185": "oe",
+    "186": "of",
+    "187": "oh",
+    "188": "om",
+    "189": "on",
+    "190": "oo",
+    "191": "or",
+    "192": "os",
+    "193": "ou",
+    "194": "pe",
+    "195": "re",
+    "196": "rh",
+    "197": "ro",
+    "198": "rr",
+    "199": "ru",
+    "200": "ry",
+    "201": "se",
+    "202": "ss",
+    "203": "ta",
+    "204": "tc",
+    "205": "te",
+    "206": "th",
+    "207": "to",
+    "208": "tr",
+    "209": "ts",
+    "210": "tt",
+    "211": "tu",
+    "212": "tw",
+    "213": "ty",
+    "214": "ue",
+    "215": "un",
+    "216": "ur",
+    "217": "us",
+    "218": "ut",
+    "219": "we",
+    "220": "ys",
+    "221": "ze"
+  },
+  "size": 222,
+  "eligible_bigram_count": 145,
+  "vocabulary": [
+    {
+      "token": "Af",
+      "n_exact_alignment": 52,
+      "exact_alignment_connected_rate": 0.5,
+      "utility": 0.5
+    },
+    {
+      "token": "Al",
+      "n_exact_alignment": 29,
+      "exact_alignment_connected_rate": 0.5862068965517241,
+      "utility": 0.5862068965517241
+    },
+    {
+      "token": "Am",
+      "n_exact_alignment": 46,
+      "exact_alignment_connected_rate": 0.7391304347826086,
+      "utility": 0.7391304347826086
+    },
+    {
+      "token": "An",
+      "n_exact_alignment": 141,
+      "exact_alignment_connected_rate": 0.7021276595744681,
+      "utility": 0.7021276595744681
+    },
+    {
+      "token": "Ar",
+      "n_exact_alignment": 33,
+      "exact_alignment_connected_rate": 0.7272727272727273,
+      "utility": 0.7272727272727273
+    },
+    {
+      "token": "As",
+      "n_exact_alignment": 34,
+      "exact_alignment_connected_rate": 0.5588235294117647,
+      "utility": 0.5588235294117647
+    },
+    {
+      "token": "At",
+      "n_exact_alignment": 23,
+      "exact_alignment_connected_rate": 0.5217391304347826,
+      "utility": 0.5217391304347826
+    },
+    {
+      "token": "Be",
+      "n_exact_alignment": 46,
+      "exact_alignment_connected_rate": 0.6521739130434783,
+      "utility": 0.6521739130434783
+    },
+    {
+      "token": "Ca",
+      "n_exact_alignment": 44,
+      "exact_alignment_connected_rate": 0.6818181818181818,
+      "utility": 0.6818181818181818
+    },
+    {
+      "token": "Ce",
+      "n_exact_alignment": 22,
+      "exact_alignment_connected_rate": 0.6818181818181818,
+      "utility": 0.6818181818181818
+    },
+    {
+      "token": "Ch",
+      "n_exact_alignment": 58,
+      "exact_alignment_connected_rate": 0.6379310344827587,
+      "utility": 0.6379310344827587
+    },
+    {
+      "token": "Co",
+      "n_exact_alignment": 163,
+      "exact_alignment_connected_rate": 0.588957055214724,
+      "utility": 0.588957055214724
+    },
+    {
+      "token": "De",
+      "n_exact_alignment": 31,
+      "exact_alignment_connected_rate": 0.5161290322580645,
+      "utility": 0.5161290322580645
+    },
+    {
+      "token": "En",
+      "n_exact_alignment": 41,
+      "exact_alignment_connected_rate": 0.6829268292682927,
+      "utility": 0.6829268292682927
+    },
+    {
+      "token": "Fe",
+      "n_exact_alignment": 40,
+      "exact_alignment_connected_rate": 0.525,
+      "utility": 0.525
+    },
+    {
+      "token": "Ga",
+      "n_exact_alignment": 22,
+      "exact_alignment_connected_rate": 0.5454545454545454,
+      "utility": 0.5454545454545454
+    },
+    {
+      "token": "Ge",
+      "n_exact_alignment": 111,
+      "exact_alignment_connected_rate": 0.5495495495495496,
+      "utility": 0.5495495495495496
+    },
+    {
+      "token": "He",
+      "n_exact_alignment": 173,
+      "exact_alignment_connected_rate": 0.5202312138728323,
+      "utility": 0.5202312138728323
+    },
+    {
+      "token": "Ke",
+      "n_exact_alignment": 33,
+      "exact_alignment_connected_rate": 0.5454545454545454,
+      "utility": 0.5454545454545454
+    },
+    {
+      "token": "La",
+      "n_exact_alignment": 94,
+      "exact_alignment_connected_rate": 0.5212765957446809,
+      "utility": 0.5212765957446809
+    },
+    {
+      "token": "Le",
+      "n_exact_alignment": 32,
+      "exact_alignment_connected_rate": 0.65625,
+      "utility": 0.65625
+    },
+    {
+      "token": "Lo",
+      "n_exact_alignment": 69,
+      "exact_alignment_connected_rate": 0.5942028985507246,
+      "utility": 0.5942028985507246
+    },
+    {
+      "token": "Mr",
+      "n_exact_alignment": 271,
+      "exact_alignment_connected_rate": 0.5350553505535055,
+      "utility": 0.5350553505535055
+    },
+    {
+      "token": "Re",
+      "n_exact_alignment": 33,
+      "exact_alignment_connected_rate": 0.696969696969697,
+      "utility": 0.696969696969697
+    },
+    {
+      "token": "Ro",
+      "n_exact_alignment": 78,
+      "exact_alignment_connected_rate": 0.6282051282051282,
+      "utility": 0.6282051282051282
+    },
+    {
+      "token": "Ru",
+      "n_exact_alignment": 29,
+      "exact_alignment_connected_rate": 0.6206896551724138,
+      "utility": 0.6206896551724138
+    },
+    {
+      "token": "Se",
+      "n_exact_alignment": 68,
+      "exact_alignment_connected_rate": 0.5294117647058824,
+      "utility": 0.5294117647058824
+    },
+    {
+      "token": "Un",
+      "n_exact_alignment": 43,
+      "exact_alignment_connected_rate": 0.5813953488372093,
+      "utility": 0.5813953488372093
+    },
+    {
+      "token": "ab",
+      "n_exact_alignment": 383,
+      "exact_alignment_connected_rate": 0.556135770234987,
+      "utility": 0.556135770234987
+    },
+    {
+      "token": "af",
+      "n_exact_alignment": 72,
+      "exact_alignment_connected_rate": 0.5,
+      "utility": 0.5
+    },
+    {
+      "token": "ai",
+      "n_exact_alignment": 603,
+      "exact_alignment_connected_rate": 0.6401326699834162,
+      "utility": 0.6401326699834162
+    },
+    {
+      "token": "al",
+      "n_exact_alignment": 1359,
+      "exact_alignment_connected_rate": 0.5548197203826343,
+      "utility": 0.5548197203826343
+    },
+    {
+      "token": "am",
+      "n_exact_alignment": 327,
+      "exact_alignment_connected_rate": 0.581039755351682,
+      "utility": 0.581039755351682
+    },
+    {
+      "token": "an",
+      "n_exact_alignment": 2777,
+      "exact_alignment_connected_rate": 0.6755491537630537,
+      "utility": 0.6755491537630537
+    },
+    {
+      "token": "ar",
+      "n_exact_alignment": 1692,
+      "exact_alignment_connected_rate": 0.6737588652482269,
+      "utility": 0.6737588652482269
+    },
+    {
+      "token": "as",
+      "n_exact_alignment": 1511,
+      "exact_alignment_connected_rate": 0.598941098610192,
+      "utility": 0.598941098610192
+    },
+    {
+      "token": "at",
+      "n_exact_alignment": 2096,
+      "exact_alignment_connected_rate": 0.5500954198473282,
+      "utility": 0.5500954198473282
+    },
+    {
+      "token": "au",
+      "n_exact_alignment": 189,
+      "exact_alignment_connected_rate": 0.8148148148148148,
+      "utility": 0.8148148148148148
+    },
+    {
+      "token": "aw",
+      "n_exact_alignment": 81,
+      "exact_alignment_connected_rate": 0.5308641975308642,
+      "utility": 0.5308641975308642
+    },
+    {
+      "token": "ax",
+      "n_exact_alignment": 23,
+      "exact_alignment_connected_rate": 0.6086956521739131,
+      "utility": 0.6086956521739131
+    },
+    {
+      "token": "ay",
+      "n_exact_alignment": 485,
+      "exact_alignment_connected_rate": 0.6391752577319587,
+      "utility": 0.6391752577319587
+    },
+    {
+      "token": "bb",
+      "n_exact_alignment": 27,
+      "exact_alignment_connected_rate": 0.5185185185185185,
+      "utility": 0.5185185185185185
+    },
+    {
+      "token": "be",
+      "n_exact_alignment": 1104,
+      "exact_alignment_connected_rate": 0.6784420289855072,
+      "utility": 0.6784420289855072
+    },
+    {
+      "token": "bo",
+      "n_exact_alignment": 295,
+      "exact_alignment_connected_rate": 0.5627118644067797,
+      "utility": 0.5627118644067797
+    },
+    {
+      "token": "ca",
+      "n_exact_alignment": 583,
+      "exact_alignment_connected_rate": 0.5454545454545454,
+      "utility": 0.5454545454545454
+    },
+    {
+      "token": "ce",
+      "n_exact_alignment": 913,
+      "exact_alignment_connected_rate": 0.7568455640744798,
+      "utility": 0.7568455640744798
+    },
+    {
+      "token": "ch",
+      "n_exact_alignment": 884,
+      "exact_alignment_connected_rate": 0.7251131221719457,
+      "utility": 0.7251131221719457
+    },
+    {
+      "token": "ci",
+      "n_exact_alignment": 321,
+      "exact_alignment_connected_rate": 0.6012461059190031,
+      "utility": 0.6012461059190031
+    },
+    {
+      "token": "ck",
+      "n_exact_alignment": 203,
+      "exact_alignment_connected_rate": 0.5714285714285714,
+      "utility": 0.5714285714285714
+    },
+    {
+      "token": "cl",
+      "n_exact_alignment": 186,
+      "exact_alignment_connected_rate": 0.5268817204301075,
+      "utility": 0.5268817204301075
+    },
+    {
+      "token": "co",
+      "n_exact_alignment": 804,
+      "exact_alignment_connected_rate": 0.5796019900497512,
+      "utility": 0.5796019900497512
+    },
+    {
+      "token": "cr",
+      "n_exact_alignment": 238,
+      "exact_alignment_connected_rate": 0.5378151260504201,
+      "utility": 0.5378151260504201
+    },
+    {
+      "token": "ct",
+      "n_exact_alignment": 505,
+      "exact_alignment_connected_rate": 0.5287128712871287,
+      "utility": 0.5287128712871287
+    },
+    {
+      "token": "cu",
+      "n_exact_alignment": 220,
+      "exact_alignment_connected_rate": 0.5818181818181818,
+      "utility": 0.5818181818181818
+    },
+    {
+      "token": "de",
+      "n_exact_alignment": 1115,
+      "exact_alignment_connected_rate": 0.7004484304932735,
+      "utility": 0.7004484304932735
+    },
+    {
+      "token": "do",
+      "n_exact_alignment": 286,
+      "exact_alignment_connected_rate": 0.5384615384615384,
+      "utility": 0.5384615384615384
+    },
+    {
+      "token": "dr",
+      "n_exact_alignment": 94,
+      "exact_alignment_connected_rate": 0.6170212765957447,
+      "utility": 0.6170212765957447
+    },
+    {
+      "token": "ds",
+      "n_exact_alignment": 183,
+      "exact_alignment_connected_rate": 0.5245901639344263,
+      "utility": 0.5245901639344263
+    },
+    {
+      "token": "du",
+      "n_exact_alignment": 120,
+      "exact_alignment_connected_rate": 0.65,
+      "utility": 0.65
+    },
+    {
+      "token": "ea",
+      "n_exact_alignment": 1267,
+      "exact_alignment_connected_rate": 0.6045777426992897,
+      "utility": 0.6045777426992897
+    },
+    {
+      "token": "ed",
+      "n_exact_alignment": 1896,
+      "exact_alignment_connected_rate": 0.5485232067510548,
+      "utility": 0.5485232067510548
+    },
+    {
+      "token": "ee",
+      "n_exact_alignment": 700,
+      "exact_alignment_connected_rate": 0.7842857142857143,
+      "utility": 0.7842857142857143
+    },
+    {
+      "token": "ei",
+      "n_exact_alignment": 336,
+      "exact_alignment_connected_rate": 0.6011904761904762,
+      "utility": 0.6011904761904762
+    },
+    {
+      "token": "el",
+      "n_exact_alignment": 771,
+      "exact_alignment_connected_rate": 0.6083009079118028,
+      "utility": 0.6083009079118028
+    },
+    {
+      "token": "em",
+      "n_exact_alignment": 614,
+      "exact_alignment_connected_rate": 0.6726384364820847,
+      "utility": 0.6726384364820847
+    },
+    {
+      "token": "en",
+      "n_exact_alignment": 2269,
+      "exact_alignment_connected_rate": 0.7871308946672543,
+      "utility": 0.7871308946672543
+    },
+    {
+      "token": "eo",
+      "n_exact_alignment": 131,
+      "exact_alignment_connected_rate": 0.6030534351145038,
+      "utility": 0.6030534351145038
+    },
+    {
+      "token": "er",
+      "n_exact_alignment": 3245,
+      "exact_alignment_connected_rate": 0.8046224961479199,
+      "utility": 0.8046224961479199
+    },
+    {
+      "token": "es",
+      "n_exact_alignment": 1815,
+      "exact_alignment_connected_rate": 0.6578512396694215,
+      "utility": 0.6578512396694215
+    },
+    {
+      "token": "et",
+      "n_exact_alignment": 659,
+      "exact_alignment_connected_rate": 0.5295902883156297,
+      "utility": 0.5295902883156297
+    },
+    {
+      "token": "eu",
+      "n_exact_alignment": 32,
+      "exact_alignment_connected_rate": 0.78125,
+      "utility": 0.78125
+    },
+    {
+      "token": "ev",
+      "n_exact_alignment": 447,
+      "exact_alignment_connected_rate": 0.5369127516778524,
+      "utility": 0.5369127516778524
+    },
+    {
+      "token": "ew",
+      "n_exact_alignment": 192,
+      "exact_alignment_connected_rate": 0.65625,
+      "utility": 0.65625
+    },
+    {
+      "token": "ex",
+      "n_exact_alignment": 226,
+      "exact_alignment_connected_rate": 0.6106194690265486,
+      "utility": 0.6106194690265486
+    },
+    {
+      "token": "ey",
+      "n_exact_alignment": 315,
+      "exact_alignment_connected_rate": 0.6444444444444445,
+      "utility": 0.6444444444444445
+    },
+    {
+      "token": "fa",
+      "n_exact_alignment": 262,
+      "exact_alignment_connected_rate": 0.6412213740458015,
+      "utility": 0.6412213740458015
+    },
+    {
+      "token": "fe",
+      "n_exact_alignment": 356,
+      "exact_alignment_connected_rate": 0.75,
+      "utility": 0.75
+    },
+    {
+      "token": "ff",
+      "n_exact_alignment": 231,
+      "exact_alignment_connected_rate": 0.6926406926406926,
+      "utility": 0.6926406926406926
+    },
+    {
+      "token": "fl",
+      "n_exact_alignment": 63,
+      "exact_alignment_connected_rate": 0.5396825396825397,
+      "utility": 0.5396825396825397
+    },
+    {
+      "token": "fo",
+      "n_exact_alignment": 671,
+      "exact_alignment_connected_rate": 0.6721311475409836,
+      "utility": 0.6721311475409836
+    },
+    {
+      "token": "fr",
+      "n_exact_alignment": 293,
+      "exact_alignment_connected_rate": 0.6689419795221843,
+      "utility": 0.6689419795221843
+    },
+    {
+      "token": "ft",
+      "n_exact_alignment": 113,
+      "exact_alignment_connected_rate": 0.6194690265486725,
+      "utility": 0.6194690265486725
+    },
+    {
+      "token": "fu",
+      "n_exact_alignment": 163,
+      "exact_alignment_connected_rate": 0.7116564417177914,
+      "utility": 0.7116564417177914
+    },
+    {
+      "token": "ge",
+      "n_exact_alignment": 466,
+      "exact_alignment_connected_rate": 0.7274678111587983,
+      "utility": 0.7274678111587983
+    },
+    {
+      "token": "gn",
+      "n_exact_alignment": 71,
+      "exact_alignment_connected_rate": 0.5211267605633803,
+      "utility": 0.5211267605633803
+    },
+    {
+      "token": "gr",
+      "n_exact_alignment": 249,
+      "exact_alignment_connected_rate": 0.5421686746987951,
+      "utility": 0.5421686746987951
+    },
+    {
+      "token": "ha",
+      "n_exact_alignment": 1826,
+      "exact_alignment_connected_rate": 0.5394304490690033,
+      "utility": 0.5394304490690033
+    },
+    {
+      "token": "he",
+      "n_exact_alignment": 4766,
+      "exact_alignment_connected_rate": 0.7519932857742342,
+      "utility": 0.7519932857742342
+    },
+    {
+      "token": "hi",
+      "n_exact_alignment": 1207,
+      "exact_alignment_connected_rate": 0.5501242750621376,
+      "utility": 0.5501242750621376
+    },
+    {
+      "token": "ho",
+      "n_exact_alignment": 850,
+      "exact_alignment_connected_rate": 0.5164705882352941,
+      "utility": 0.5164705882352941
+    },
+    {
+      "token": "hs",
+      "n_exact_alignment": 22,
+      "exact_alignment_connected_rate": 0.5,
+      "utility": 0.5
+    },
+    {
+      "token": "ht",
+      "n_exact_alignment": 258,
+      "exact_alignment_connected_rate": 0.5155038759689923,
+      "utility": 0.5155038759689923
+    },
+    {
+      "token": "hu",
+      "n_exact_alignment": 95,
+      "exact_alignment_connected_rate": 0.5789473684210527,
+      "utility": 0.5789473684210527
+    },
+    {
+      "token": "hy",
+      "n_exact_alignment": 55,
+      "exact_alignment_connected_rate": 0.509090909090909,
+      "utility": 0.509090909090909
+    },
+    {
+      "token": "ke",
+      "n_exact_alignment": 399,
+      "exact_alignment_connected_rate": 0.6666666666666666,
+      "utility": 0.6666666666666666
+    },
+    {
+      "token": "ki",
+      "n_exact_alignment": 146,
+      "exact_alignment_connected_rate": 0.547945205479452,
+      "utility": 0.547945205479452
+    },
+    {
+      "token": "kn",
+      "n_exact_alignment": 65,
+      "exact_alignment_connected_rate": 0.5692307692307692,
+      "utility": 0.5692307692307692
+    },
+    {
+      "token": "le",
+      "n_exact_alignment": 1275,
+      "exact_alignment_connected_rate": 0.6784313725490196,
+      "utility": 0.6784313725490196
+    },
+    {
+      "token": "li",
+      "n_exact_alignment": 922,
+      "exact_alignment_connected_rate": 0.5086767895878525,
+      "utility": 0.5086767895878525
+    },
+    {
+      "token": "ll",
+      "n_exact_alignment": 959,
+      "exact_alignment_connected_rate": 0.5964546402502607,
+      "utility": 0.5964546402502607
+    },
+    {
+      "token": "lu",
+      "n_exact_alignment": 108,
+      "exact_alignment_connected_rate": 0.6481481481481481,
+      "utility": 0.6481481481481481
+    },
+    {
+      "token": "ly",
+      "n_exact_alignment": 573,
+      "exact_alignment_connected_rate": 0.5863874345549738,
+      "utility": 0.5863874345549738
+    },
+    {
+      "token": "me",
+      "n_exact_alignment": 1158,
+      "exact_alignment_connected_rate": 0.6485319516407599,
+      "utility": 0.6485319516407599
+    },
+    {
+      "token": "mu",
+      "n_exact_alignment": 157,
+      "exact_alignment_connected_rate": 0.5159235668789809,
+      "utility": 0.5159235668789809
+    },
+    {
+      "token": "my",
+      "n_exact_alignment": 56,
+      "exact_alignment_connected_rate": 0.5892857142857143,
+      "utility": 0.5892857142857143
+    },
+    {
+      "token": "ne",
+      "n_exact_alignment": 1069,
+      "exact_alignment_connected_rate": 0.6501403180542563,
+      "utility": 0.6501403180542563
+    },
+    {
+      "token": "nu",
+      "n_exact_alignment": 111,
+      "exact_alignment_connected_rate": 0.5585585585585585,
+      "utility": 0.5585585585585585
+    },
+    {
+      "token": "ny",
+      "n_exact_alignment": 186,
+      "exact_alignment_connected_rate": 0.532258064516129,
+      "utility": 0.532258064516129
+    },
+    {
+      "token": "oe",
+      "n_exact_alignment": 51,
+      "exact_alignment_connected_rate": 0.5490196078431373,
+      "utility": 0.5490196078431373
+    },
+    {
+      "token": "of",
+      "n_exact_alignment": 1427,
+      "exact_alignment_connected_rate": 0.5585143658023827,
+      "utility": 0.5585143658023827
+    },
+    {
+      "token": "oh",
+      "n_exact_alignment": 21,
+      "exact_alignment_connected_rate": 0.6666666666666666,
+      "utility": 0.6666666666666666
+    },
+    {
+      "token": "om",
+      "n_exact_alignment": 843,
+      "exact_alignment_connected_rate": 0.501779359430605,
+      "utility": 0.501779359430605
+    },
+    {
+      "token": "on",
+      "n_exact_alignment": 2351,
+      "exact_alignment_connected_rate": 0.5971926839642705,
+      "utility": 0.5971926839642705
+    },
+    {
+      "token": "oo",
+      "n_exact_alignment": 345,
+      "exact_alignment_connected_rate": 0.6521739130434783,
+      "utility": 0.6521739130434783
+    },
+    {
+      "token": "or",
+      "n_exact_alignment": 1714,
+      "exact_alignment_connected_rate": 0.6038506417736289,
+      "utility": 0.6038506417736289
+    },
+    {
+      "token": "os",
+      "n_exact_alignment": 375,
+      "exact_alignment_connected_rate": 0.5653333333333334,
+      "utility": 0.5653333333333334
+    },
+    {
+      "token": "ou",
+      "n_exact_alignment": 1433,
+      "exact_alignment_connected_rate": 0.6120027913468249,
+      "utility": 0.6120027913468249
+    },
+    {
+      "token": "pe",
+      "n_exact_alignment": 765,
+      "exact_alignment_connected_rate": 0.5660130718954248,
+      "utility": 0.5660130718954248
+    },
+    {
+      "token": "re",
+      "n_exact_alignment": 2618,
+      "exact_alignment_connected_rate": 0.6501145912910619,
+      "utility": 0.6501145912910619
+    },
+    {
+      "token": "rh",
+      "n_exact_alignment": 32,
+      "exact_alignment_connected_rate": 0.5,
+      "utility": 0.5
+    },
+    {
+      "token": "ro",
+      "n_exact_alignment": 1005,
+      "exact_alignment_connected_rate": 0.5432835820895522,
+      "utility": 0.5432835820895522
+    },
+    {
+      "token": "rr",
+      "n_exact_alignment": 202,
+      "exact_alignment_connected_rate": 0.5099009900990099,
+      "utility": 0.5099009900990099
+    },
+    {
+      "token": "ru",
+      "n_exact_alignment": 140,
+      "exact_alignment_connected_rate": 0.5428571428571428,
+      "utility": 0.5428571428571428
+    },
+    {
+      "token": "ry",
+      "n_exact_alignment": 360,
+      "exact_alignment_connected_rate": 0.5277777777777778,
+      "utility": 0.5277777777777778
+    },
+    {
+      "token": "se",
+      "n_exact_alignment": 1269,
+      "exact_alignment_connected_rate": 0.6264775413711584,
+      "utility": 0.6264775413711584
+    },
+    {
+      "token": "ss",
+      "n_exact_alignment": 481,
+      "exact_alignment_connected_rate": 0.6257796257796258,
+      "utility": 0.6257796257796258
+    },
+    {
+      "token": "ta",
+      "n_exact_alignment": 769,
+      "exact_alignment_connected_rate": 0.5448634590377113,
+      "utility": 0.5448634590377113
+    },
+    {
+      "token": "tc",
+      "n_exact_alignment": 44,
+      "exact_alignment_connected_rate": 0.5227272727272727,
+      "utility": 0.5227272727272727
+    },
+    {
+      "token": "te",
+      "n_exact_alignment": 1648,
+      "exact_alignment_connected_rate": 0.7245145631067961,
+      "utility": 0.7245145631067961
+    },
+    {
+      "token": "th",
+      "n_exact_alignment": 5024,
+      "exact_alignment_connected_rate": 0.6938694267515924,
+      "utility": 0.6938694267515924
+    },
+    {
+      "token": "to",
+      "n_exact_alignment": 1806,
+      "exact_alignment_connected_rate": 0.70874861572536,
+      "utility": 0.70874861572536
+    },
+    {
+      "token": "tr",
+      "n_exact_alignment": 611,
+      "exact_alignment_connected_rate": 0.6873977086743044,
+      "utility": 0.6873977086743044
+    },
+    {
+      "token": "ts",
+      "n_exact_alignment": 395,
+      "exact_alignment_connected_rate": 0.6,
+      "utility": 0.6
+    },
+    {
+      "token": "tt",
+      "n_exact_alignment": 327,
+      "exact_alignment_connected_rate": 0.7737003058103975,
+      "utility": 0.7737003058103975
+    },
+    {
+      "token": "tu",
+      "n_exact_alignment": 270,
+      "exact_alignment_connected_rate": 0.7666666666666667,
+      "utility": 0.7666666666666667
+    },
+    {
+      "token": "tw",
+      "n_exact_alignment": 101,
+      "exact_alignment_connected_rate": 0.6138613861386139,
+      "utility": 0.6138613861386139
+    },
+    {
+      "token": "ty",
+      "n_exact_alignment": 219,
+      "exact_alignment_connected_rate": 0.6118721461187214,
+      "utility": 0.6118721461187214
+    },
+    {
+      "token": "ue",
+      "n_exact_alignment": 159,
+      "exact_alignment_connected_rate": 0.7232704402515723,
+      "utility": 0.7232704402515723
+    },
+    {
+      "token": "un",
+      "n_exact_alignment": 607,
+      "exact_alignment_connected_rate": 0.5897858319604613,
+      "utility": 0.5897858319604613
+    },
+    {
+      "token": "ur",
+      "n_exact_alignment": 774,
+      "exact_alignment_connected_rate": 0.6020671834625323,
+      "utility": 0.6020671834625323
+    },
+    {
+      "token": "us",
+      "n_exact_alignment": 630,
+      "exact_alignment_connected_rate": 0.5190476190476191,
+      "utility": 0.5190476190476191
+    },
+    {
+      "token": "ut",
+      "n_exact_alignment": 674,
+      "exact_alignment_connected_rate": 0.5370919881305638,
+      "utility": 0.5370919881305638
+    },
+    {
+      "token": "we",
+      "n_exact_alignment": 572,
+      "exact_alignment_connected_rate": 0.5209790209790209,
+      "utility": 0.5209790209790209
+    },
+    {
+      "token": "ys",
+      "n_exact_alignment": 98,
+      "exact_alignment_connected_rate": 0.5204081632653061,
+      "utility": 0.5204081632653061
+    },
+    {
+      "token": "ze",
+      "n_exact_alignment": 28,
+      "exact_alignment_connected_rate": 0.7142857142857143,
+      "utility": 0.7142857142857143
+    }
+  ],
+  "note": "Frozen IAM-only experiment policy. The 20-observation and 0.5-rate thresholds were provisional demonstration settings and are not a held-out optimality claim. No downstream data or results were used to select or validate the bigrams.",
+  "model_version": "iam-english-handwriting-bigram-v1",
+  "unicode_normalization": "NFC",
+  "evidence_provenance": {
+    "sole_dataset": "IAM",
+    "sole_split": "train",
+    "connectivity_method": "dominant-core-v3",
+    "line_count": 5694,
+    "evidence_count": 160536,
+    "score_count": 1259,
+    "source_scores_sha256": "45c86a9f703ebc3684563ec2a840e7c34241aa76e84d692be46cf11bfec27055",
+    "source_manifest_sha256": "82cb95a14e71ab5b70c868ca1676b3f628552fabac395fbd30039fc7798bf190",
+    "source_model_sha256": "36db922860cbd501a6c5a1297dbf7d998abdbe1a337513acb00b44e74fbd9334"
+  },
+  "reconstruction": {
+    "source_model_exact_match": true,
+    "deterministic_order": "blank, Unicode-sorted singletons, token-sorted eligible bigrams"
+  },
+  "downstream_contract": {
+    "vocabulary_selection": "frozen from IAM train handwriting evidence only",
+    "reference_segmentation": "maximum-total-utility-non-overlapping-v1",
+    "task_alphabet": "consumer responsibility",
+    "segmentation_policy": "consumer responsibility; must be declared separately"
+  }
+}

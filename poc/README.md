@@ -288,6 +288,41 @@ The richer connectivity statistics and provenance remain in the same model
 JSON. Re-run the build command above to upgrade a model created before these
 mappings were added.
 
+## Frozen generic IAM-English artifact
+
+The provisional model was later audited and formalized, without changing its
+145 selected bigrams, connectivity utilities, observation counts, singleton
+layer, or IDs. The generic artifact is
+`poc/frozen/iam-english-handwriting-bigram-v1.json` (SHA-256
+`2fbb81479211454d8ad028d8af76eb26e76b75b80408a1a1e1f4efa15ab26a92`).
+It has 222 classes: CTC blank ID 0, 76 IAM-derived singleton characters, and
+145 handwriting bigrams.
+
+Generate it from the pinned IAM-train files with:
+
+```bash
+PYTHONPATH=poc conda run -n dtlr-poc python poc/scripts/build_iam_bigram_tokenizer.py \
+  --scores /home/artellisys/dtlr-output/iam-train-full/bigrams-dominant-core-v3/bigram_scores.json \
+  --manifest /home/artellisys/dtlr-output/iam-train-full/bigrams-dominant-core-v3/manifest.json \
+  --source-model /home/artellisys/dtlr-output/iam-train-full/tokenizer-demo/model.json \
+  --model-version iam-english-handwriting-bigram-v1 \
+  --minimum-count 20 --rate-threshold 0.5 --pair-policy letters-only \
+  --output poc/frozen/iam-english-handwriting-bigram-v1.json
+```
+
+Freeze mode validates all three input hashes, the evidence schema, IAM/train
+identity, `dominant-core-v3`, and exact reconstruction of the original model.
+Text is normalized to NFC before the existing maximum-total-utility DP
+reference segmentation. The vocabulary selection is IAM-handwriting evidence;
+a consuming repository remains responsible for declaring its task alphabet
+and segmentation policy. No downstream dataset or labels were used in this
+freeze.
+
+The minimum-count 20 and connected-rate 0.5 cutoffs remain the earlier
+provisional demonstration settings. Freezing them makes this experiment
+reproducible and prevents downstream tuning; it does not establish that they
+are statistically optimal or held-out validated.
+
 If any selected processed line image is absent, prepare that exact line using
 the same recorded IAM/PyLaia preprocessing procedure as the smoke run. Do not
 replace a difficult or failed selected line with another line; record missing
