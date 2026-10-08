@@ -359,3 +359,22 @@ and evaluation policy are documented in
 Run `poc/scripts/build_iam_handwriting_subwords.py` to generate experimental
 models and an IAM-train comparison under ignored `outputs/` within DTLR.
 The frozen 145-bigram artifact and its reference DP remain unchanged.
+
+## Longer-span review and text-only comparison
+
+The follow-up keeps the frozen bigram and existing HW prototypes intact:
+
+- [Longer-span visual QA pilot](provenance/iam-long-span-qa-pilot.md): 22 fixed,
+  stratified IAM train examples, original images, boxes, CCL diagnostics, and
+  separately labelled AI-assisted notes. Human review remains pending.
+- [Matched text-only BPE/Unigram controls](provenance/iam-text-subword-controls.md):
+  training without CCL edges, matching alphabet/budget/encoders, and a five-model
+  descriptive train comparison with support stratified by token length.
+
+Build a new review directory with `scripts/build_iam_span_review.py`; build
+controls and their report with `scripts/build_iam_text_subword_controls.py`.
+The provenance notes contain complete commands. Current galleries and reports
+are under ignored `outputs/iam-long-span-qa-v1/` and
+`outputs/iam-text-controls-v2/`. The scientific distinction is explicit:
+compression, automatic image-support agreement, and recognition accuracy are
+separate outcomes. These experiments establish the first two on training data.

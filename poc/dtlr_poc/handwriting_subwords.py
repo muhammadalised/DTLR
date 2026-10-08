@@ -10,6 +10,7 @@ from .selection import text_sha256
 
 SCHEMA = "dtlr.handwriting-subwords.v1"
 SPAN_METHOD = "pairwise-consistent-dominant-component-v1"
+TEXT_SCHEMA = "dtlr.text-subwords.v1"
 
 
 def prepare_corpus(records, rows, selection, manifest):
@@ -107,15 +108,39 @@ def collect_candidates(corpus, max_length=6, minimum_count=20, rate_threshold=0.
     return result
 
 
+def collect_text_candidates(corpus, max_length=6, minimum_count=20):
+    """Count letter-only spans without accessing any handwriting edges."""
+    if type(max_length) is not int or max_length < 2:
+        raise ValueError("max_length must be at least two")
+    if type(minimum_count) is not int or minimum_count < 1:
+        raise ValueError("minimum_count must be positive")
+    counts = Counter()
+    for line in corpus:
+        text = line["text"]
+        for start, char in enumerate(text):
+            if not char.isalpha():
+                continue
+            for end in range(start + 2, min(len(text), start + max_length) + 1):
+                if not text[end - 1].isalpha():
+                    break
+                counts[text[start:end]] += 1
+    return {token: {"token": token, "n_total": count}
+            for token, count in sorted(counts.items()) if count >= minimum_count}
+
+
 def _model(algorithm, singletons, candidates, selected, policy):
     ordered = [""] + sorted(singletons) + sorted(selected)
-    return {"schema_version": SCHEMA, "status": "experimental-not-frozen",
+    model = {"schema_version": SCHEMA, "status": "experimental-not-frozen",
             "algorithm": algorithm, "dataset": "IAM", "training_split": "train",
             "unicode_normalization": "NFC", "connectivity_method": "dominant-core-v3",
             "span_connectivity_method": SPAN_METHOD, "blank_token": "", "blank_id": 0,
             "size": len(ordered), "vocab": {t: i for i, t in enumerate(ordered)},
             "idx_token": {str(i): t for i, t in enumerate(ordered)},
             "vocabulary": [candidates[t] for t in sorted(selected)], "policy": policy}
+    if algorithm.startswith("text-only-"):
+        model["schema_version"] = TEXT_SCHEMA
+        del model["connectivity_method"], model["span_connectivity_method"]
+    return model
 
 
 def _alphabet(corpus, singletons):
@@ -138,8 +163,10 @@ def _apply_merge(sequence, pair):
     return result
 
 
-def train_bpe(corpus, candidates, budget=145, singletons=None):
-    """Rank current token pairs by connected support; apply merges globally."""
+def train_bpe(corpus, candidates, budget=145, singletons=None, handwriting_aware=True):
+    """Rank current pairs by visual support, or text frequency for a control."""
+    if type(handwriting_aware) is not bool:
+        raise ValueError("handwriting_aware must be boolean")
     if type(budget) is not int or budget < 0:
         raise ValueError("budget must be nonnegative")
     singletons = _alphabet(corpus, singletons)
@@ -153,18 +180,23 @@ def train_bpe(corpus, candidates, budget=145, singletons=None):
                 if token in candidates and token not in selected:
                     pair = (left[0], right[0])
                     frequencies[pair] += 1
-                    if span_connected(line, left[1], right[2]) is True:
+                    if handwriting_aware and span_connected(line, left[1], right[2]) is True:
                         support[pair] += 1
-        if not support:
+        priority = support if handwriting_aware else frequencies
+        if not priority:
             break
-        pair = min(support, key=lambda p: (-support[p], p[0] + p[1], p))
+        pair = min(priority, key=lambda p: (-priority[p], p[0] + p[1], p))
         selected.add(pair[0] + pair[1])
-        merges.append({"left": pair[0], "right": pair[1], "token": pair[0] + pair[1],
-                       "connected_occurrences_at_merge": support[pair],
-                       "text_occurrences_at_merge": frequencies[pair]})
+        merge = {"left": pair[0], "right": pair[1], "token": pair[0] + pair[1],
+                 "text_occurrences_at_merge": frequencies[pair]}
+        if handwriting_aware:
+            merge["connected_occurrences_at_merge"] = support[pair]
+        merges.append(merge)
         sequences = [_apply_merge(sequence, pair) for sequence in sequences]
-    model = _model("handwriting-aware-bpe", singletons, candidates, selected,
-                   {"subword_budget": budget, "merge_priority": "current-connected-occurrence-count",
+    algorithm = "handwriting-aware-bpe" if handwriting_aware else "text-only-bpe"
+    model = _model(algorithm, singletons, candidates, selected,
+                   {"subword_budget": budget, "merge_priority":
+                    "current-connected-occurrence-count" if handwriting_aware else "current-text-occurrence-count",
                     "merge_application": "all-text-occurrences-left-to-right",
                     "inference": "ordered-BPE-merges"})
     model["merges"] = merges
@@ -229,17 +261,20 @@ def _em(word_counts, weights, iterations):
 
 
 def train_unigram(corpus, candidates, budget=145, singletons=None, iterations=8,
-                  seed_multiplier=4, shrink_factor=0.75):
+                  seed_multiplier=4, shrink_factor=0.75, handwriting_aware=True):
     """CCL-constrained unigram LM with EM and fixed-weight removal-loss pruning.
 
     This custom prototype uses exact individual removal losses at fixed weights; it is not SentencePiece.
     Images influence candidate eligibility and connected-count initialization.
+    With handwriting_aware=False, use text-frequency seeds/initialization only.
     """
     if (type(budget) is not int or budget < 0 or type(iterations) is not int or iterations < 1
             or type(seed_multiplier) is not int or seed_multiplier < 1):
         raise ValueError("invalid unigram budget/iterations/seed multiplier")
     if not math.isfinite(shrink_factor) or not 0 < shrink_factor < 1:
         raise ValueError("shrink_factor must be strictly between zero and one")
+    if type(handwriting_aware) is not bool:
+        raise ValueError("handwriting_aware must be boolean")
     singletons = _alphabet(corpus, singletons)
     char_counts = Counter(c for line in corpus for c in line["text"])
     # All non-letter boundaries force singletons, exactly factorizing likelihood.
@@ -256,10 +291,11 @@ def train_unigram(corpus, candidates, budget=145, singletons=None, iterations=8,
                 words[c] += 1
         if run:
             words[run] += 1
-    ranked = sorted(candidates, key=lambda t: (-candidates[t]["n_connected"], t))
+    count_key = "n_connected" if handwriting_aware else "n_total"
+    ranked = sorted(candidates, key=lambda t: (-candidates[t][count_key], t))
     active = set(ranked[:budget * seed_multiplier])
     weights = {c: max(char_counts[c], 1) for c in sorted(singletons)}
-    weights.update({t: max(candidates[t]["n_connected"], 1e-12) for t in sorted(active)})
+    weights.update({t: max(candidates[t][count_key], 1e-12) for t in sorted(active)})
     curve = []
     while True:
         probs, expected, history = _em(words, weights, iterations)
@@ -270,10 +306,11 @@ def train_unigram(corpus, candidates, budget=145, singletons=None, iterations=8,
         losses = removal_losses(words, {t: math.log(p) for t, p in probs.items()}, active)
         active = set(sorted(active, key=lambda t: (-losses[t], t))[:keep])
         weights = {t: p for t, p in probs.items() if len(t) == 1 or t in active}
-    model = _model("handwriting-aware-unigram", singletons, candidates, active,
+    algorithm = "handwriting-aware-unigram" if handwriting_aware else "text-only-unigram"
+    model = _model(algorithm, singletons, candidates, active,
                    {"subword_budget": budget, "iterations_per_stage": iterations,
                     "seed_multiplier": seed_multiplier, "shrink_factor": shrink_factor,
-                    "seed_priority": "connected-occurrence-count",
+                    "seed_priority": "connected-occurrence-count" if handwriting_aware else "text-occurrence-count",
                     "pruning": "individual-fixed-weight-removal-log-likelihood-loss",
                     "training": "exact-forward-backward-EM-on-training-text",
                     "inference": "maximum-log-probability-Viterbi"})
@@ -284,8 +321,9 @@ def train_unigram(corpus, candidates, budget=145, singletons=None, iterations=8,
 
 class HandwritingSubwordTokenizer:
     def __init__(self, model):
-        if model.get("schema_version") != SCHEMA or model.get("algorithm") not in (
-                "handwriting-aware-bpe", "handwriting-aware-unigram"):
+        algorithms = {SCHEMA: ("handwriting-aware-bpe", "handwriting-aware-unigram"),
+                      TEXT_SCHEMA: ("text-only-bpe", "text-only-unigram")}
+        if model.get("algorithm") not in algorithms.get(model.get("schema_version"), ()):
             raise ValueError("unsupported handwriting subword model")
         vocab = model["vocab"]
         inverse = {int(i): t for i, t in model["idx_token"].items()}
@@ -297,7 +335,7 @@ class HandwritingSubwordTokenizer:
         subwords = {t for t in vocab if len(t) > 1}
         if any(not all(c.isalpha() and c in vocab for c in t) for t in subwords):
             raise ValueError("subwords must be letters with singleton fallback")
-        if model["algorithm"] == "handwriting-aware-bpe":
+        if model["algorithm"].endswith("-bpe"):
             available = {t for t in vocab if len(t) == 1}
             for merge in model["merges"]:
                 if (merge["left"] not in available or merge["right"] not in available
@@ -321,7 +359,7 @@ class HandwritingSubwordTokenizer:
         missing = sorted(set(text) - set(self.vocab))
         if missing:
             raise ValueError(f"characters are absent from tokenizer vocabulary: {missing!r}")
-        if self.model["algorithm"] == "handwriting-aware-bpe":
+        if self.model["algorithm"].endswith("-bpe"):
             sequence = [(c, i, i + 1) for i, c in enumerate(text)]
             for merge in self.model["merges"]:
                 sequence = _apply_merge(sequence, (merge["left"], merge["right"]))

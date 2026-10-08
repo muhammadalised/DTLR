@@ -119,3 +119,31 @@ hash seeds regenerate models and reports byte for byte. Train-only reductions
 versus characters are 25.07% (derived HW bigram), 27.40% (HW BPE), and 26.71%
 (HW Unigram). See the provenance note for connectivity tradeoffs, denominators,
 output hashes, and the limits of these descriptive measurements.
+
+## IAM longer-span QA and matched text controls (2026-10-08)
+
+The next three DTLR steps were carried out in order on
+`codex/iam-handwriting-bpe-unigram`: an AI-assisted visual QA pilot, text-only
+BPE/Unigram controls, and a matched descriptive IAM training comparison.
+
+- Read `poc/provenance/iam-long-span-qa-pilot.md` for the 22-span stratified
+  inspection. All 71 box-present pair checks and five missing-pair checks
+  reproduce the saved evidence. Real examples expose empty cores and an
+  internal localization failure; human annotations remain pending. The rule
+  and existing models were not changed to fit this review.
+- Read `poc/provenance/iam-text-subword-controls.md` for the declared control
+  policy and complete results. Controls use only IAM training text and the
+  same alphabet, vocabulary budget, and algorithm-family encoders. A separate
+  schema identifies text models; training does not read CCL edges.
+- The successful comparison and control models are under ignored
+  `outputs/iam-text-controls-v2/`. All five models round-trip all 5,694 training
+  lines without blank emission. Text controls compress more; HW models have
+  higher observed component support, including within shared token lengths.
+  These measurements do not establish held-out recognition gains.
+
+The full CPU suite now has 65 passing tests. Default HW learned parameters and
+prior comparison measurements were verified unchanged. The frozen bigram
+artifact retains its pinned hash. Notebook work remains separate. No TVA,
+READ, FAU, or other downstream dataset is accessed, and nothing is pushed.
+Next scientific step: independent predeclared review and an IAM recognition
+comparison/evaluation policy before training/evaluation claims.
