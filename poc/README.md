@@ -344,3 +344,18 @@ For each retained run, save outside Git:
 - IAM archive/preprocessing provenance and hashes for `labels.pkl` and the line list;
 - split, start/IDs, thresholds, NMS, binarization threshold, and output hashes;
 - manual visual-QA decision and any excluded lines, with reasons.
+
+## Experimental handwriting-aware BPE and Unigram
+
+The IAM-only extension reuses occurrence-level CCL evidence to learn
+variable-length subwords. BPE ranks merges by image-supported occurrence count;
+Unigram uses a CCL-constrained candidate vocabulary, exact EM, and declared
+individual removal-loss pruning. Both learn from IAM train only and require
+only text when applying the learned model.
+
+The full method, limitations, generation command, shared-alphabet adaptation,
+and evaluation policy are documented in
+[`provenance/iam-handwriting-subwords-poc.md`](provenance/iam-handwriting-subwords-poc.md).
+Run `poc/scripts/build_iam_handwriting_subwords.py` to generate experimental
+models and an IAM-train comparison under ignored `outputs/` within DTLR.
+The frozen 145-bigram artifact and its reference DP remain unchanged.

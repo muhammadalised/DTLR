@@ -83,3 +83,39 @@ The next repository may consume the frozen 145-bigram inventory, define its
 own task singleton alphabet, and explicitly declare how overlapping bigrams
 are segmented. Any such adapter must be versioned and described as derived;
 it is not the unchanged DTLR evidence artifact.
+
+## Experimental handwriting-aware BPE / Unigram extension (2026-10-08)
+
+Branch `codex/iam-handwriting-bpe-unigram`, based on the local frozen-bigram commit
+d2f4631 of `dtlr-iam-bigram-poc`, adds an IAM-train-only variable-length tokenizer prototype.
+Read `poc/provenance/iam-handwriting-subwords-poc.md` for the full method,
+reproduction command, training settings, limitations, and next evaluation steps.
+New implementation: `poc/dtlr_poc/handwriting_subwords.py`;
+CLI: `poc/scripts/build_iam_handwriting_subwords.py`;
+tests: `poc/tests/test_handwriting_subwords.py`.
+
+Reuse existing occurrence-level dominant-core-v3 evidence. Longer candidates
+require one consistent component across all usable/exact pair-facing cores;
+this is an exploratory span extension requiring visual QA. BPE ranks current
+merges by image-supported occurrence counts. Unigram constrains its candidate
+vocabulary with CCL evidence, then fits a text unigram LM with exact EM and
+individual fixed-weight removal-loss pruning. It is a custom implementation,
+not SentencePiece and not a joint image/text likelihood.
+
+The full IAM-train text has three isolated symbols absent from the frozen
+76-singleton layer: `(`, `#`, and `&`. A separately labelled derived bigram
+comparison copy appends them, preserving all original IDs, bigrams, utilities,
+and counts. All three comparison models use 79 singletons, 145 subwords, and
+blank ID 0 (225 CTC classes). The frozen 222-class artifact is unchanged.
+
+Generated models, candidate evidence, hashes, and descriptive train comparison
+are under `outputs/iam-handwriting-subwords-v1/` (ignored by Git). These outputs
+are prototypes, not frozen artifacts or recognition-performance results.
+No TVA, READ, FAU, or other downstream data is used, and nothing is pushed.
+
+Verification: all 56 CPU tests passed; all three models round-trip every
+IAM-train line without blank emission; two full builds with different Python
+hash seeds regenerate models and reports byte for byte. Train-only reductions
+versus characters are 25.07% (derived HW bigram), 27.40% (HW BPE), and 26.71%
+(HW Unigram). See the provenance note for connectivity tradeoffs, denominators,
+output hashes, and the limits of these descriptive measurements.
