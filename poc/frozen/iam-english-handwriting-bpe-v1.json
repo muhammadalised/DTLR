@@ -1,0 +1,2577 @@
+{
+  "algorithm": "handwriting-aware-bpe",
+  "blank_id": 0,
+  "blank_token": "",
+  "candidate_policy": {
+    "max_token_length": 6,
+    "minimum_count": 20,
+    "pair_policy": "letters-only",
+    "rate_threshold": 0.5,
+    "span_method": "pairwise-consistent-dominant-component-v1",
+    "threshold_status": "provisional inherited count/rate; new length cap is exploratory"
+  },
+  "connectivity_method": "dominant-core-v3",
+  "dataset": "IAM",
+  "evidence_provenance": {
+    "implementation_sha256": {
+      "poc/dtlr_poc/handwriting_subwords.py": "b61b6962dbf99142594debb7302252b025e6949ea56684a15eb504d34f0a00d3",
+      "poc/dtlr_poc/selection.py": "6acb59de90795262474524435e439bf1e16e7499a341fb7245d4816397147ece",
+      "poc/dtlr_poc/tokenizer.py": "5dcc479f4ed4adf75800e2bff386a0844a14e7216410d089c674fc6b98cfec03",
+      "poc/scripts/build_iam_handwriting_subwords.py": "be1005167de63988f681237364dbe8302646f1ad59ed3a9bc23437c95d36b4a2"
+    },
+    "implementation_status": "uncommitted prototype; source tree must accompany results",
+    "line_count": 5694,
+    "python_version": "3.11.0 | packaged by conda-forge | (main, Jan 14 2023, 12:27:40) [GCC 11.3.0]",
+    "reference_singleton_count": 79,
+    "sole_dataset": "IAM",
+    "sole_split": "train",
+    "source_paths": {
+      "detections": "/home/artellisys/dtlr-output/iam-train-full/detections.jsonl",
+      "evidence": "/home/artellisys/dtlr-output/iam-train-full/bigrams-dominant-core-v3/bigram_evidence.json",
+      "frozen_bigram": "/home/artellisys/DTLR/poc/frozen/iam-english-handwriting-bigram-v1.json",
+      "manifest": "/home/artellisys/dtlr-output/iam-train-full/bigrams-dominant-core-v3/manifest.json",
+      "scores": "/home/artellisys/dtlr-output/iam-train-full/bigrams-dominant-core-v3/bigram_scores.json",
+      "selection": "/home/artellisys/dtlr-output/iam-train-full/selection.json"
+    },
+    "source_repository_commit": "d2f4631c5adbc0a721e01f3bb2e179b877934976",
+    "source_sha256": {
+      "detections": "5e68b4c2ef1db15b5d1776ba1d4b7696ba9289f81dd4dd018598dd7d6aea2b32",
+      "evidence": "9c75d6d240127c2e6a6c4dffd83c491beab6a31dc4be204461861c1913740bd3",
+      "frozen_bigram": "2fbb81479211454d8ad028d8af76eb26e76b75b80408a1a1e1f4efa15ab26a92",
+      "manifest": "82cb95a14e71ab5b70c868ca1676b3f628552fabac395fbd30039fc7798bf190",
+      "scores": "45c86a9f703ebc3684563ec2a840e7c34241aa76e84d692be46cf11bfec27055",
+      "selection": "7893dfba4febe6df99cf0bdb0c74fabe7b736d2a6af05033d8638b90455bc1c2"
+    }
+  },
+  "freeze": {
+    "candidate_pool_count": 303,
+    "candidate_pool_sha256": "a0d7cd4569aa8feffe65a8816b41e6579ab937efab8d9cf4ab25513b1762aebc",
+    "consumer_contract": {
+      "blank": "empty token at ID 0; never emitted by encoding",
+      "derived_variants": "alphabet, IDs or encoding changes require a separately versioned derived artifact",
+      "frozen_content": "preserve vocabulary, IDs, evidence counts, policies, merges/probabilities and provenance",
+      "unknown_characters": "raise an error; no silent unknown or byte fallback"
+    },
+    "ctc_class_count": 225,
+    "inference_inputs": "text only; NFC; case, spaces and punctuation preserved",
+    "reference_segmentation": "ordered-BPE-merges",
+    "release_date": "2026-10-08",
+    "release_version": "iam-english-handwriting-subwords-v1",
+    "review_status": "22-span AI-assisted train pilot and informal user qualitative review; case-level human annotations pending",
+    "reviewed_implementation_commit": "9cecdf3574c7b3193a743f367fa61f12c2839239",
+    "schema_version": "dtlr.handwriting-subword-freeze.v1",
+    "scientific_limitations": [
+      "Frozen experimental configuration; not statistically optimal or held-out validated.",
+      "Count 20/rate 0.5 are inherited exploratory settings; length cap 6 is exploratory.",
+      "Long-span pair-facing component consistency is conservative and has localization/abstention limitations.",
+      "Handwriting constrains Unigram candidates and initialization; its EM objective is text likelihood, not joint visual likelihood.",
+      "Training comparisons reuse selection evidence and do not establish recognition gains."
+    ],
+    "singleton_count": 79,
+    "source_model_exact_reconstruction": true,
+    "source_model_sha256": "9dedba1087e8e011633251b22159f857fb2e80babc15c877f7ffb03d7a985aad",
+    "source_model_status": "experimental-not-frozen",
+    "subword_count": 145
+  },
+  "idx_token": {
+    "0": "",
+    "1": " ",
+    "10": "+",
+    "100": "ber",
+    "101": "bo",
+    "102": "ca",
+    "103": "ce",
+    "104": "cen",
+    "105": "cer",
+    "106": "ces",
+    "107": "ch",
+    "108": "ci",
+    "109": "ck",
+    "11": ",",
+    "110": "cl",
+    "111": "co",
+    "112": "cr",
+    "113": "ct",
+    "114": "cu",
+    "115": "de",
+    "116": "den",
+    "117": "der",
+    "118": "des",
+    "119": "do",
+    "12": "-",
+    "120": "dr",
+    "121": "ds",
+    "122": "du",
+    "123": "ed",
+    "124": "el",
+    "125": "em",
+    "126": "en",
+    "127": "er",
+    "128": "ere",
+    "129": "ers",
+    "13": ".",
+    "130": "es",
+    "131": "et",
+    "132": "ev",
+    "133": "ew",
+    "134": "ex",
+    "135": "ey",
+    "136": "fa",
+    "137": "fe",
+    "138": "fer",
+    "139": "ff",
+    "14": "/",
+    "140": "fo",
+    "141": "fr",
+    "142": "fu",
+    "143": "ge",
+    "144": "gen",
+    "145": "ges",
+    "146": "gn",
+    "147": "gr",
+    "148": "gre",
+    "149": "ha",
+    "15": "0",
+    "150": "he",
+    "151": "hen",
+    "152": "her",
+    "153": "here",
+    "154": "hi",
+    "155": "ho",
+    "156": "ht",
+    "157": "ke",
+    "158": "ken",
+    "159": "ki",
+    "16": "1",
+    "160": "kn",
+    "161": "lay",
+    "162": "le",
+    "163": "li",
+    "164": "ll",
+    "165": "ly",
+    "166": "me",
+    "167": "men",
+    "168": "mer",
+    "169": "mu",
+    "17": "2",
+    "170": "my",
+    "171": "ne",
+    "172": "nes",
+    "173": "new",
+    "174": "nu",
+    "175": "of",
+    "176": "om",
+    "177": "on",
+    "178": "oo",
+    "179": "or",
+    "18": "3",
+    "180": "os",
+    "181": "ou",
+    "182": "our",
+    "183": "out",
+    "184": "pe",
+    "185": "pen",
+    "186": "re",
+    "187": "rem",
+    "188": "ren",
+    "189": "ro",
+    "19": "4",
+    "190": "ry",
+    "191": "se",
+    "192": "sen",
+    "193": "ser",
+    "194": "ss",
+    "195": "ta",
+    "196": "te",
+    "197": "tem",
+    "198": "ten",
+    "199": "ter",
+    "2": "!",
+    "20": "5",
+    "200": "th",
+    "201": "the",
+    "202": "them",
+    "203": "ther",
+    "204": "thi",
+    "205": "to",
+    "206": "ton",
+    "207": "too",
+    "208": "tr",
+    "209": "tre",
+    "21": "6",
+    "210": "try",
+    "211": "ts",
+    "212": "tt",
+    "213": "tter",
+    "214": "tu",
+    "215": "tur",
+    "216": "tw",
+    "217": "ty",
+    "218": "ue",
+    "219": "un",
+    "22": "7",
+    "220": "ur",
+    "221": "us",
+    "222": "ut",
+    "223": "ves",
+    "224": "we",
+    "23": "8",
+    "24": "9",
+    "25": ":",
+    "26": ";",
+    "27": "?",
+    "28": "A",
+    "29": "B",
+    "3": "\"",
+    "30": "C",
+    "31": "D",
+    "32": "E",
+    "33": "F",
+    "34": "G",
+    "35": "H",
+    "36": "I",
+    "37": "J",
+    "38": "K",
+    "39": "L",
+    "4": "#",
+    "40": "M",
+    "41": "N",
+    "42": "O",
+    "43": "P",
+    "44": "Q",
+    "45": "R",
+    "46": "S",
+    "47": "T",
+    "48": "U",
+    "49": "V",
+    "5": "&",
+    "50": "W",
+    "51": "X",
+    "52": "Y",
+    "53": "Z",
+    "54": "a",
+    "55": "b",
+    "56": "c",
+    "57": "d",
+    "58": "e",
+    "59": "f",
+    "6": "'",
+    "60": "g",
+    "61": "h",
+    "62": "i",
+    "63": "j",
+    "64": "k",
+    "65": "l",
+    "66": "m",
+    "67": "n",
+    "68": "o",
+    "69": "p",
+    "7": "(",
+    "70": "q",
+    "71": "r",
+    "72": "s",
+    "73": "t",
+    "74": "u",
+    "75": "v",
+    "76": "w",
+    "77": "x",
+    "78": "y",
+    "79": "z",
+    "8": ")",
+    "80": "An",
+    "81": "He",
+    "82": "Mr",
+    "83": "Ro",
+    "84": "ab",
+    "85": "ai",
+    "86": "al",
+    "87": "am",
+    "88": "an",
+    "89": "ar",
+    "9": "*",
+    "90": "are",
+    "91": "as",
+    "92": "ass",
+    "93": "at",
+    "94": "au",
+    "95": "aw",
+    "96": "ay",
+    "97": "ays",
+    "98": "be",
+    "99": "been"
+  },
+  "merges": [
+    {
+      "connected_occurrences_at_merge": 3584,
+      "left": "h",
+      "right": "e",
+      "text_occurrences_at_merge": 4849,
+      "token": "he"
+    },
+    {
+      "connected_occurrences_at_merge": 2139,
+      "left": "e",
+      "right": "r",
+      "text_occurrences_at_merge": 2711,
+      "token": "er"
+    },
+    {
+      "connected_occurrences_at_merge": 1916,
+      "left": "t",
+      "right": "he",
+      "text_occurrences_at_merge": 3337,
+      "token": "the"
+    },
+    {
+      "connected_occurrences_at_merge": 1876,
+      "left": "a",
+      "right": "n",
+      "text_occurrences_at_merge": 2793,
+      "token": "an"
+    },
+    {
+      "connected_occurrences_at_merge": 1671,
+      "left": "e",
+      "right": "n",
+      "text_occurrences_at_merge": 2125,
+      "token": "en"
+    },
+    {
+      "connected_occurrences_at_merge": 1468,
+      "left": "r",
+      "right": "e",
+      "text_occurrences_at_merge": 2242,
+      "token": "re"
+    },
+    {
+      "connected_occurrences_at_merge": 1404,
+      "left": "o",
+      "right": "n",
+      "text_occurrences_at_merge": 2365,
+      "token": "on"
+    },
+    {
+      "connected_occurrences_at_merge": 1224,
+      "left": "t",
+      "right": "o",
+      "text_occurrences_at_merge": 1774,
+      "token": "to"
+    },
+    {
+      "connected_occurrences_at_merge": 1169,
+      "left": "t",
+      "right": "h",
+      "text_occurrences_at_merge": 1712,
+      "token": "th"
+    },
+    {
+      "connected_occurrences_at_merge": 1062,
+      "left": "a",
+      "right": "t",
+      "text_occurrences_at_merge": 1926,
+      "token": "at"
+    },
+    {
+      "connected_occurrences_at_merge": 973,
+      "left": "e",
+      "right": "s",
+      "text_occurrences_at_merge": 1476,
+      "token": "es"
+    },
+    {
+      "connected_occurrences_at_merge": 940,
+      "left": "a",
+      "right": "r",
+      "text_occurrences_at_merge": 1425,
+      "token": "ar"
+    },
+    {
+      "connected_occurrences_at_merge": 926,
+      "left": "e",
+      "right": "d",
+      "text_occurrences_at_merge": 1698,
+      "token": "ed"
+    },
+    {
+      "connected_occurrences_at_merge": 905,
+      "left": "a",
+      "right": "s",
+      "text_occurrences_at_merge": 1515,
+      "token": "as"
+    },
+    {
+      "connected_occurrences_at_merge": 862,
+      "left": "o",
+      "right": "u",
+      "text_occurrences_at_merge": 1423,
+      "token": "ou"
+    },
+    {
+      "connected_occurrences_at_merge": 804,
+      "left": "o",
+      "right": "r",
+      "text_occurrences_at_merge": 1343,
+      "token": "or"
+    },
+    {
+      "connected_occurrences_at_merge": 797,
+      "left": "o",
+      "right": "f",
+      "text_occurrences_at_merge": 1466,
+      "token": "of"
+    },
+    {
+      "connected_occurrences_at_merge": 754,
+      "left": "a",
+      "right": "l",
+      "text_occurrences_at_merge": 1379,
+      "token": "al"
+    },
+    {
+      "connected_occurrences_at_merge": 617,
+      "left": "b",
+      "right": "e",
+      "text_occurrences_at_merge": 912,
+      "token": "be"
+    },
+    {
+      "connected_occurrences_at_merge": 570,
+      "left": "c",
+      "right": "h",
+      "text_occurrences_at_merge": 784,
+      "token": "ch"
+    },
+    {
+      "connected_occurrences_at_merge": 556,
+      "left": "l",
+      "right": "e",
+      "text_occurrences_at_merge": 869,
+      "token": "le"
+    },
+    {
+      "connected_occurrences_at_merge": 489,
+      "left": "s",
+      "right": "e",
+      "text_occurrences_at_merge": 749,
+      "token": "se"
+    },
+    {
+      "connected_occurrences_at_merge": 459,
+      "left": "h",
+      "right": "i",
+      "text_occurrences_at_merge": 862,
+      "token": "hi"
+    },
+    {
+      "connected_occurrences_at_merge": 446,
+      "left": "c",
+      "right": "e",
+      "text_occurrences_at_merge": 595,
+      "token": "ce"
+    },
+    {
+      "connected_occurrences_at_merge": 424,
+      "left": "l",
+      "right": "i",
+      "text_occurrences_at_merge": 843,
+      "token": "li"
+    },
+    {
+      "connected_occurrences_at_merge": 401,
+      "left": "r",
+      "right": "o",
+      "text_occurrences_at_merge": 730,
+      "token": "ro"
+    },
+    {
+      "connected_occurrences_at_merge": 386,
+      "left": "a",
+      "right": "i",
+      "text_occurrences_at_merge": 612,
+      "token": "ai"
+    },
+    {
+      "connected_occurrences_at_merge": 339,
+      "left": "h",
+      "right": "a",
+      "text_occurrences_at_merge": 615,
+      "token": "ha"
+    },
+    {
+      "connected_occurrences_at_merge": 338,
+      "left": "d",
+      "right": "e",
+      "text_occurrences_at_merge": 484,
+      "token": "de"
+    },
+    {
+      "connected_occurrences_at_merge": 330,
+      "left": "l",
+      "right": "y",
+      "text_occurrences_at_merge": 639,
+      "token": "ly"
+    },
+    {
+      "connected_occurrences_at_merge": 328,
+      "left": "t",
+      "right": "e",
+      "text_occurrences_at_merge": 459,
+      "token": "te"
+    },
+    {
+      "connected_occurrences_at_merge": 325,
+      "left": "m",
+      "right": "e",
+      "text_occurrences_at_merge": 517,
+      "token": "me"
+    },
+    {
+      "connected_occurrences_at_merge": 314,
+      "left": "n",
+      "right": "e",
+      "text_occurrences_at_merge": 470,
+      "token": "ne"
+    },
+    {
+      "connected_occurrences_at_merge": 310,
+      "left": "a",
+      "right": "y",
+      "text_occurrences_at_merge": 497,
+      "token": "ay"
+    },
+    {
+      "connected_occurrences_at_merge": 307,
+      "left": "l",
+      "right": "l",
+      "text_occurrences_at_merge": 522,
+      "token": "ll"
+    },
+    {
+      "connected_occurrences_at_merge": 301,
+      "left": "t",
+      "right": "r",
+      "text_occurrences_at_merge": 461,
+      "token": "tr"
+    },
+    {
+      "connected_occurrences_at_merge": 290,
+      "left": "t",
+      "right": "er",
+      "text_occurrences_at_merge": 469,
+      "token": "ter"
+    },
+    {
+      "connected_occurrences_at_merge": 250,
+      "left": "m",
+      "right": "en",
+      "text_occurrences_at_merge": 393,
+      "token": "men"
+    },
+    {
+      "connected_occurrences_at_merge": 246,
+      "left": "h",
+      "right": "o",
+      "text_occurrences_at_merge": 481,
+      "token": "ho"
+    },
+    {
+      "connected_occurrences_at_merge": 226,
+      "left": "t",
+      "right": "s",
+      "text_occurrences_at_merge": 401,
+      "token": "ts"
+    },
+    {
+      "connected_occurrences_at_merge": 217,
+      "left": "u",
+      "right": "n",
+      "text_occurrences_at_merge": 369,
+      "token": "un"
+    },
+    {
+      "connected_occurrences_at_merge": 210,
+      "left": "u",
+      "right": "t",
+      "text_occurrences_at_merge": 412,
+      "token": "ut"
+    },
+    {
+      "connected_occurrences_at_merge": 206,
+      "left": "c",
+      "right": "t",
+      "text_occurrences_at_merge": 381,
+      "token": "ct"
+    },
+    {
+      "connected_occurrences_at_merge": 201,
+      "left": "a",
+      "right": "b",
+      "text_occurrences_at_merge": 362,
+      "token": "ab"
+    },
+    {
+      "connected_occurrences_at_merge": 199,
+      "left": "c",
+      "right": "o",
+      "text_occurrences_at_merge": 342,
+      "token": "co"
+    },
+    {
+      "connected_occurrences_at_merge": 193,
+      "left": "c",
+      "right": "i",
+      "text_occurrences_at_merge": 328,
+      "token": "ci"
+    },
+    {
+      "connected_occurrences_at_merge": 191,
+      "left": "u",
+      "right": "s",
+      "text_occurrences_at_merge": 378,
+      "token": "us"
+    },
+    {
+      "connected_occurrences_at_merge": 187,
+      "left": "g",
+      "right": "e",
+      "text_occurrences_at_merge": 264,
+      "token": "ge"
+    },
+    {
+      "connected_occurrences_at_merge": 174,
+      "left": "p",
+      "right": "e",
+      "text_occurrences_at_merge": 303,
+      "token": "pe"
+    },
+    {
+      "connected_occurrences_at_merge": 174,
+      "left": "u",
+      "right": "r",
+      "text_occurrences_at_merge": 310,
+      "token": "ur"
+    },
+    {
+      "connected_occurrences_at_merge": 166,
+      "left": "w",
+      "right": "e",
+      "text_occurrences_at_merge": 322,
+      "token": "we"
+    },
+    {
+      "connected_occurrences_at_merge": 164,
+      "left": "a",
+      "right": "re",
+      "text_occurrences_at_merge": 280,
+      "token": "are"
+    },
+    {
+      "connected_occurrences_at_merge": 158,
+      "left": "f",
+      "right": "e",
+      "text_occurrences_at_merge": 217,
+      "token": "fe"
+    },
+    {
+      "connected_occurrences_at_merge": 158,
+      "left": "k",
+      "right": "e",
+      "text_occurrences_at_merge": 239,
+      "token": "ke"
+    },
+    {
+      "connected_occurrences_at_merge": 145,
+      "left": "M",
+      "right": "r",
+      "text_occurrences_at_merge": 273,
+      "token": "Mr"
+    },
+    {
+      "connected_occurrences_at_merge": 145,
+      "left": "e",
+      "right": "v",
+      "text_occurrences_at_merge": 241,
+      "token": "ev"
+    },
+    {
+      "connected_occurrences_at_merge": 143,
+      "left": "a",
+      "right": "m",
+      "text_occurrences_at_merge": 235,
+      "token": "am"
+    },
+    {
+      "connected_occurrences_at_merge": 142,
+      "left": "o",
+      "right": "s",
+      "text_occurrences_at_merge": 251,
+      "token": "os"
+    },
+    {
+      "connected_occurrences_at_merge": 136,
+      "left": "the",
+      "right": "r",
+      "text_occurrences_at_merge": 245,
+      "token": "ther"
+    },
+    {
+      "connected_occurrences_at_merge": 132,
+      "left": "ou",
+      "right": "r",
+      "text_occurrences_at_merge": 259,
+      "token": "our"
+    },
+    {
+      "connected_occurrences_at_merge": 130,
+      "left": "d",
+      "right": "er",
+      "text_occurrences_at_merge": 220,
+      "token": "der"
+    },
+    {
+      "connected_occurrences_at_merge": 130,
+      "left": "th",
+      "right": "i",
+      "text_occurrences_at_merge": 255,
+      "token": "thi"
+    },
+    {
+      "connected_occurrences_at_merge": 130,
+      "left": "t",
+      "right": "y",
+      "text_occurrences_at_merge": 234,
+      "token": "ty"
+    },
+    {
+      "connected_occurrences_at_merge": 122,
+      "left": "h",
+      "right": "t",
+      "text_occurrences_at_merge": 238,
+      "token": "ht"
+    },
+    {
+      "connected_occurrences_at_merge": 121,
+      "left": "o",
+      "right": "o",
+      "text_occurrences_at_merge": 189,
+      "token": "oo"
+    },
+    {
+      "connected_occurrences_at_merge": 115,
+      "left": "a",
+      "right": "u",
+      "text_occurrences_at_merge": 146,
+      "token": "au"
+    },
+    {
+      "connected_occurrences_at_merge": 109,
+      "left": "e",
+      "right": "l",
+      "text_occurrences_at_merge": 178,
+      "token": "el"
+    },
+    {
+      "connected_occurrences_at_merge": 107,
+      "left": "t",
+      "right": "a",
+      "text_occurrences_at_merge": 181,
+      "token": "ta"
+    },
+    {
+      "connected_occurrences_at_merge": 106,
+      "left": "c",
+      "right": "k",
+      "text_occurrences_at_merge": 183,
+      "token": "ck"
+    },
+    {
+      "connected_occurrences_at_merge": 106,
+      "left": "s",
+      "right": "s",
+      "text_occurrences_at_merge": 166,
+      "token": "ss"
+    },
+    {
+      "connected_occurrences_at_merge": 104,
+      "left": "t",
+      "right": "t",
+      "text_occurrences_at_merge": 134,
+      "token": "tt"
+    },
+    {
+      "connected_occurrences_at_merge": 102,
+      "left": "he",
+      "right": "r",
+      "text_occurrences_at_merge": 144,
+      "token": "her"
+    },
+    {
+      "connected_occurrences_at_merge": 100,
+      "left": "e",
+      "right": "x",
+      "text_occurrences_at_merge": 173,
+      "token": "ex"
+    },
+    {
+      "connected_occurrences_at_merge": 99,
+      "left": "A",
+      "right": "n",
+      "text_occurrences_at_merge": 142,
+      "token": "An"
+    },
+    {
+      "connected_occurrences_at_merge": 97,
+      "left": "d",
+      "right": "o",
+      "text_occurrences_at_merge": 176,
+      "token": "do"
+    },
+    {
+      "connected_occurrences_at_merge": 94,
+      "left": "ou",
+      "right": "t",
+      "text_occurrences_at_merge": 169,
+      "token": "out"
+    },
+    {
+      "connected_occurrences_at_merge": 93,
+      "left": "er",
+      "right": "s",
+      "text_occurrences_at_merge": 193,
+      "token": "ers"
+    },
+    {
+      "connected_occurrences_at_merge": 90,
+      "left": "d",
+      "right": "s",
+      "text_occurrences_at_merge": 178,
+      "token": "ds"
+    },
+    {
+      "connected_occurrences_at_merge": 88,
+      "left": "be",
+      "right": "en",
+      "text_occurrences_at_merge": 164,
+      "token": "been"
+    },
+    {
+      "connected_occurrences_at_merge": 87,
+      "left": "er",
+      "right": "e",
+      "text_occurrences_at_merge": 130,
+      "token": "ere"
+    },
+    {
+      "connected_occurrences_at_merge": 86,
+      "left": "o",
+      "right": "m",
+      "text_occurrences_at_merge": 179,
+      "token": "om"
+    },
+    {
+      "connected_occurrences_at_merge": 81,
+      "left": "f",
+      "right": "u",
+      "text_occurrences_at_merge": 113,
+      "token": "fu"
+    },
+    {
+      "connected_occurrences_at_merge": 80,
+      "left": "e",
+      "right": "y",
+      "text_occurrences_at_merge": 137,
+      "token": "ey"
+    },
+    {
+      "connected_occurrences_at_merge": 79,
+      "left": "H",
+      "right": "e",
+      "text_occurrences_at_merge": 148,
+      "token": "He"
+    },
+    {
+      "connected_occurrences_at_merge": 79,
+      "left": "d",
+      "right": "es",
+      "text_occurrences_at_merge": 155,
+      "token": "des"
+    },
+    {
+      "connected_occurrences_at_merge": 77,
+      "left": "f",
+      "right": "r",
+      "text_occurrences_at_merge": 118,
+      "token": "fr"
+    },
+    {
+      "connected_occurrences_at_merge": 75,
+      "left": "d",
+      "right": "en",
+      "text_occurrences_at_merge": 129,
+      "token": "den"
+    },
+    {
+      "connected_occurrences_at_merge": 75,
+      "left": "k",
+      "right": "i",
+      "text_occurrences_at_merge": 132,
+      "token": "ki"
+    },
+    {
+      "connected_occurrences_at_merge": 73,
+      "left": "he",
+      "right": "n",
+      "text_occurrences_at_merge": 115,
+      "token": "hen"
+    },
+    {
+      "connected_occurrences_at_merge": 72,
+      "left": "f",
+      "right": "f",
+      "text_occurrences_at_merge": 113,
+      "token": "ff"
+    },
+    {
+      "connected_occurrences_at_merge": 71,
+      "left": "c",
+      "right": "es",
+      "text_occurrences_at_merge": 125,
+      "token": "ces"
+    },
+    {
+      "connected_occurrences_at_merge": 71,
+      "left": "c",
+      "right": "u",
+      "text_occurrences_at_merge": 129,
+      "token": "cu"
+    },
+    {
+      "connected_occurrences_at_merge": 70,
+      "left": "c",
+      "right": "en",
+      "text_occurrences_at_merge": 100,
+      "token": "cen"
+    },
+    {
+      "connected_occurrences_at_merge": 68,
+      "left": "g",
+      "right": "re",
+      "text_occurrences_at_merge": 139,
+      "token": "gre"
+    },
+    {
+      "connected_occurrences_at_merge": 64,
+      "left": "f",
+      "right": "a",
+      "text_occurrences_at_merge": 98,
+      "token": "fa"
+    },
+    {
+      "connected_occurrences_at_merge": 63,
+      "left": "he",
+      "right": "re",
+      "text_occurrences_at_merge": 109,
+      "token": "here"
+    },
+    {
+      "connected_occurrences_at_merge": 62,
+      "left": "c",
+      "right": "r",
+      "text_occurrences_at_merge": 99,
+      "token": "cr"
+    },
+    {
+      "connected_occurrences_at_merge": 62,
+      "left": "f",
+      "right": "o",
+      "text_occurrences_at_merge": 92,
+      "token": "fo"
+    },
+    {
+      "connected_occurrences_at_merge": 60,
+      "left": "te",
+      "right": "m",
+      "text_occurrences_at_merge": 96,
+      "token": "tem"
+    },
+    {
+      "connected_occurrences_at_merge": 58,
+      "left": "m",
+      "right": "er",
+      "text_occurrences_at_merge": 91,
+      "token": "mer"
+    },
+    {
+      "connected_occurrences_at_merge": 58,
+      "left": "t",
+      "right": "u",
+      "text_occurrences_at_merge": 80,
+      "token": "tu"
+    },
+    {
+      "connected_occurrences_at_merge": 56,
+      "left": "b",
+      "right": "o",
+      "text_occurrences_at_merge": 98,
+      "token": "bo"
+    },
+    {
+      "connected_occurrences_at_merge": 55,
+      "left": "p",
+      "right": "en",
+      "text_occurrences_at_merge": 113,
+      "token": "pen"
+    },
+    {
+      "connected_occurrences_at_merge": 54,
+      "left": "e",
+      "right": "t",
+      "text_occurrences_at_merge": 111,
+      "token": "et"
+    },
+    {
+      "connected_occurrences_at_merge": 53,
+      "left": "v",
+      "right": "es",
+      "text_occurrences_at_merge": 101,
+      "token": "ves"
+    },
+    {
+      "connected_occurrences_at_merge": 52,
+      "left": "c",
+      "right": "l",
+      "text_occurrences_at_merge": 104,
+      "token": "cl"
+    },
+    {
+      "connected_occurrences_at_merge": 52,
+      "left": "d",
+      "right": "u",
+      "text_occurrences_at_merge": 74,
+      "token": "du"
+    },
+    {
+      "connected_occurrences_at_merge": 52,
+      "left": "t",
+      "right": "re",
+      "text_occurrences_at_merge": 91,
+      "token": "tre"
+    },
+    {
+      "connected_occurrences_at_merge": 51,
+      "left": "r",
+      "right": "y",
+      "text_occurrences_at_merge": 104,
+      "token": "ry"
+    },
+    {
+      "connected_occurrences_at_merge": 49,
+      "left": "e",
+      "right": "m",
+      "text_occurrences_at_merge": 69,
+      "token": "em"
+    },
+    {
+      "connected_occurrences_at_merge": 49,
+      "left": "n",
+      "right": "u",
+      "text_occurrences_at_merge": 83,
+      "token": "nu"
+    },
+    {
+      "connected_occurrences_at_merge": 49,
+      "left": "t",
+      "right": "en",
+      "text_occurrences_at_merge": 86,
+      "token": "ten"
+    },
+    {
+      "connected_occurrences_at_merge": 48,
+      "left": "t",
+      "right": "w",
+      "text_occurrences_at_merge": 75,
+      "token": "tw"
+    },
+    {
+      "connected_occurrences_at_merge": 47,
+      "left": "R",
+      "right": "o",
+      "text_occurrences_at_merge": 80,
+      "token": "Ro"
+    },
+    {
+      "connected_occurrences_at_merge": 46,
+      "left": "b",
+      "right": "er",
+      "text_occurrences_at_merge": 100,
+      "token": "ber"
+    },
+    {
+      "connected_occurrences_at_merge": 45,
+      "left": "g",
+      "right": "es",
+      "text_occurrences_at_merge": 72,
+      "token": "ges"
+    },
+    {
+      "connected_occurrences_at_merge": 45,
+      "left": "the",
+      "right": "m",
+      "text_occurrences_at_merge": 87,
+      "token": "them"
+    },
+    {
+      "connected_occurrences_at_merge": 44,
+      "left": "f",
+      "right": "er",
+      "text_occurrences_at_merge": 74,
+      "token": "fer"
+    },
+    {
+      "connected_occurrences_at_merge": 44,
+      "left": "r",
+      "right": "en",
+      "text_occurrences_at_merge": 59,
+      "token": "ren"
+    },
+    {
+      "connected_occurrences_at_merge": 44,
+      "left": "s",
+      "right": "en",
+      "text_occurrences_at_merge": 85,
+      "token": "sen"
+    },
+    {
+      "connected_occurrences_at_merge": 43,
+      "left": "a",
+      "right": "w",
+      "text_occurrences_at_merge": 82,
+      "token": "aw"
+    },
+    {
+      "connected_occurrences_at_merge": 41,
+      "left": "c",
+      "right": "a",
+      "text_occurrences_at_merge": 71,
+      "token": "ca"
+    },
+    {
+      "connected_occurrences_at_merge": 41,
+      "left": "g",
+      "right": "r",
+      "text_occurrences_at_merge": 79,
+      "token": "gr"
+    },
+    {
+      "connected_occurrences_at_merge": 41,
+      "left": "ne",
+      "right": "w",
+      "text_occurrences_at_merge": 77,
+      "token": "new"
+    },
+    {
+      "connected_occurrences_at_merge": 40,
+      "left": "as",
+      "right": "s",
+      "text_occurrences_at_merge": 77,
+      "token": "ass"
+    },
+    {
+      "connected_occurrences_at_merge": 40,
+      "left": "m",
+      "right": "u",
+      "text_occurrences_at_merge": 72,
+      "token": "mu"
+    },
+    {
+      "connected_occurrences_at_merge": 40,
+      "left": "t",
+      "right": "ur",
+      "text_occurrences_at_merge": 74,
+      "token": "tur"
+    },
+    {
+      "connected_occurrences_at_merge": 39,
+      "left": "u",
+      "right": "e",
+      "text_occurrences_at_merge": 55,
+      "token": "ue"
+    },
+    {
+      "connected_occurrences_at_merge": 37,
+      "left": "s",
+      "right": "er",
+      "text_occurrences_at_merge": 69,
+      "token": "ser"
+    },
+    {
+      "connected_occurrences_at_merge": 37,
+      "left": "t",
+      "right": "ter",
+      "text_occurrences_at_merge": 51,
+      "token": "tter"
+    },
+    {
+      "connected_occurrences_at_merge": 36,
+      "left": "l",
+      "right": "ay",
+      "text_occurrences_at_merge": 69,
+      "token": "lay"
+    },
+    {
+      "connected_occurrences_at_merge": 35,
+      "left": "g",
+      "right": "en",
+      "text_occurrences_at_merge": 51,
+      "token": "gen"
+    },
+    {
+      "connected_occurrences_at_merge": 35,
+      "left": "g",
+      "right": "n",
+      "text_occurrences_at_merge": 75,
+      "token": "gn"
+    },
+    {
+      "connected_occurrences_at_merge": 35,
+      "left": "t",
+      "right": "on",
+      "text_occurrences_at_merge": 69,
+      "token": "ton"
+    },
+    {
+      "connected_occurrences_at_merge": 33,
+      "left": "e",
+      "right": "w",
+      "text_occurrences_at_merge": 48,
+      "token": "ew"
+    },
+    {
+      "connected_occurrences_at_merge": 33,
+      "left": "n",
+      "right": "es",
+      "text_occurrences_at_merge": 57,
+      "token": "nes"
+    },
+    {
+      "connected_occurrences_at_merge": 33,
+      "left": "tr",
+      "right": "y",
+      "text_occurrences_at_merge": 60,
+      "token": "try"
+    },
+    {
+      "connected_occurrences_at_merge": 32,
+      "left": "k",
+      "right": "en",
+      "text_occurrences_at_merge": 51,
+      "token": "ken"
+    },
+    {
+      "connected_occurrences_at_merge": 32,
+      "left": "k",
+      "right": "n",
+      "text_occurrences_at_merge": 53,
+      "token": "kn"
+    },
+    {
+      "connected_occurrences_at_merge": 32,
+      "left": "re",
+      "right": "m",
+      "text_occurrences_at_merge": 71,
+      "token": "rem"
+    },
+    {
+      "connected_occurrences_at_merge": 32,
+      "left": "to",
+      "right": "o",
+      "text_occurrences_at_merge": 61,
+      "token": "too"
+    },
+    {
+      "connected_occurrences_at_merge": 31,
+      "left": "c",
+      "right": "er",
+      "text_occurrences_at_merge": 38,
+      "token": "cer"
+    },
+    {
+      "connected_occurrences_at_merge": 30,
+      "left": "ay",
+      "right": "s",
+      "text_occurrences_at_merge": 61,
+      "token": "ays"
+    },
+    {
+      "connected_occurrences_at_merge": 30,
+      "left": "d",
+      "right": "r",
+      "text_occurrences_at_merge": 51,
+      "token": "dr"
+    },
+    {
+      "connected_occurrences_at_merge": 30,
+      "left": "m",
+      "right": "y",
+      "text_occurrences_at_merge": 52,
+      "token": "my"
+    }
+  ],
+  "model_version": "iam-english-handwriting-bpe-v1",
+  "policy": {
+    "inference": "ordered-BPE-merges",
+    "merge_application": "all-text-occurrences-left-to-right",
+    "merge_priority": "current-connected-occurrence-count",
+    "subword_budget": 145
+  },
+  "schema_version": "dtlr.handwriting-subwords.v1",
+  "size": 225,
+  "span_connectivity_method": "pairwise-consistent-dominant-component-v1",
+  "status": "frozen-experiment-policy",
+  "training_split": "train",
+  "unicode_normalization": "NFC",
+  "vocab": {
+    "": 0,
+    " ": 1,
+    "!": 2,
+    "\"": 3,
+    "#": 4,
+    "&": 5,
+    "'": 6,
+    "(": 7,
+    ")": 8,
+    "*": 9,
+    "+": 10,
+    ",": 11,
+    "-": 12,
+    ".": 13,
+    "/": 14,
+    "0": 15,
+    "1": 16,
+    "2": 17,
+    "3": 18,
+    "4": 19,
+    "5": 20,
+    "6": 21,
+    "7": 22,
+    "8": 23,
+    "9": 24,
+    ":": 25,
+    ";": 26,
+    "?": 27,
+    "A": 28,
+    "An": 80,
+    "B": 29,
+    "C": 30,
+    "D": 31,
+    "E": 32,
+    "F": 33,
+    "G": 34,
+    "H": 35,
+    "He": 81,
+    "I": 36,
+    "J": 37,
+    "K": 38,
+    "L": 39,
+    "M": 40,
+    "Mr": 82,
+    "N": 41,
+    "O": 42,
+    "P": 43,
+    "Q": 44,
+    "R": 45,
+    "Ro": 83,
+    "S": 46,
+    "T": 47,
+    "U": 48,
+    "V": 49,
+    "W": 50,
+    "X": 51,
+    "Y": 52,
+    "Z": 53,
+    "a": 54,
+    "ab": 84,
+    "ai": 85,
+    "al": 86,
+    "am": 87,
+    "an": 88,
+    "ar": 89,
+    "are": 90,
+    "as": 91,
+    "ass": 92,
+    "at": 93,
+    "au": 94,
+    "aw": 95,
+    "ay": 96,
+    "ays": 97,
+    "b": 55,
+    "be": 98,
+    "been": 99,
+    "ber": 100,
+    "bo": 101,
+    "c": 56,
+    "ca": 102,
+    "ce": 103,
+    "cen": 104,
+    "cer": 105,
+    "ces": 106,
+    "ch": 107,
+    "ci": 108,
+    "ck": 109,
+    "cl": 110,
+    "co": 111,
+    "cr": 112,
+    "ct": 113,
+    "cu": 114,
+    "d": 57,
+    "de": 115,
+    "den": 116,
+    "der": 117,
+    "des": 118,
+    "do": 119,
+    "dr": 120,
+    "ds": 121,
+    "du": 122,
+    "e": 58,
+    "ed": 123,
+    "el": 124,
+    "em": 125,
+    "en": 126,
+    "er": 127,
+    "ere": 128,
+    "ers": 129,
+    "es": 130,
+    "et": 131,
+    "ev": 132,
+    "ew": 133,
+    "ex": 134,
+    "ey": 135,
+    "f": 59,
+    "fa": 136,
+    "fe": 137,
+    "fer": 138,
+    "ff": 139,
+    "fo": 140,
+    "fr": 141,
+    "fu": 142,
+    "g": 60,
+    "ge": 143,
+    "gen": 144,
+    "ges": 145,
+    "gn": 146,
+    "gr": 147,
+    "gre": 148,
+    "h": 61,
+    "ha": 149,
+    "he": 150,
+    "hen": 151,
+    "her": 152,
+    "here": 153,
+    "hi": 154,
+    "ho": 155,
+    "ht": 156,
+    "i": 62,
+    "j": 63,
+    "k": 64,
+    "ke": 157,
+    "ken": 158,
+    "ki": 159,
+    "kn": 160,
+    "l": 65,
+    "lay": 161,
+    "le": 162,
+    "li": 163,
+    "ll": 164,
+    "ly": 165,
+    "m": 66,
+    "me": 166,
+    "men": 167,
+    "mer": 168,
+    "mu": 169,
+    "my": 170,
+    "n": 67,
+    "ne": 171,
+    "nes": 172,
+    "new": 173,
+    "nu": 174,
+    "o": 68,
+    "of": 175,
+    "om": 176,
+    "on": 177,
+    "oo": 178,
+    "or": 179,
+    "os": 180,
+    "ou": 181,
+    "our": 182,
+    "out": 183,
+    "p": 69,
+    "pe": 184,
+    "pen": 185,
+    "q": 70,
+    "r": 71,
+    "re": 186,
+    "rem": 187,
+    "ren": 188,
+    "ro": 189,
+    "ry": 190,
+    "s": 72,
+    "se": 191,
+    "sen": 192,
+    "ser": 193,
+    "ss": 194,
+    "t": 73,
+    "ta": 195,
+    "te": 196,
+    "tem": 197,
+    "ten": 198,
+    "ter": 199,
+    "th": 200,
+    "the": 201,
+    "them": 202,
+    "ther": 203,
+    "thi": 204,
+    "to": 205,
+    "ton": 206,
+    "too": 207,
+    "tr": 208,
+    "tre": 209,
+    "try": 210,
+    "ts": 211,
+    "tt": 212,
+    "tter": 213,
+    "tu": 214,
+    "tur": 215,
+    "tw": 216,
+    "ty": 217,
+    "u": 74,
+    "ue": 218,
+    "un": 219,
+    "ur": 220,
+    "us": 221,
+    "ut": 222,
+    "v": 75,
+    "ves": 223,
+    "w": 76,
+    "we": 224,
+    "x": 77,
+    "y": 78,
+    "z": 79
+  },
+  "vocabulary": [
+    {
+      "connected_rate": 0.7021276595744681,
+      "n_connected": 99,
+      "n_exact_alignment": 141,
+      "n_total": 142,
+      "token": "An"
+    },
+    {
+      "connected_rate": 0.5202312138728323,
+      "n_connected": 90,
+      "n_exact_alignment": 173,
+      "n_total": 174,
+      "token": "He"
+    },
+    {
+      "connected_rate": 0.5350553505535055,
+      "n_connected": 145,
+      "n_exact_alignment": 271,
+      "n_total": 273,
+      "token": "Mr"
+    },
+    {
+      "connected_rate": 0.6282051282051282,
+      "n_connected": 49,
+      "n_exact_alignment": 78,
+      "n_total": 84,
+      "token": "Ro"
+    },
+    {
+      "connected_rate": 0.556135770234987,
+      "n_connected": 213,
+      "n_exact_alignment": 383,
+      "n_total": 384,
+      "token": "ab"
+    },
+    {
+      "connected_rate": 0.6401326699834162,
+      "n_connected": 386,
+      "n_exact_alignment": 603,
+      "n_total": 612,
+      "token": "ai"
+    },
+    {
+      "connected_rate": 0.5548197203826343,
+      "n_connected": 754,
+      "n_exact_alignment": 1359,
+      "n_total": 1379,
+      "token": "al"
+    },
+    {
+      "connected_rate": 0.581039755351682,
+      "n_connected": 190,
+      "n_exact_alignment": 327,
+      "n_total": 329,
+      "token": "am"
+    },
+    {
+      "connected_rate": 0.6755491537630537,
+      "n_connected": 1876,
+      "n_exact_alignment": 2777,
+      "n_total": 2793,
+      "token": "an"
+    },
+    {
+      "connected_rate": 0.6737588652482269,
+      "n_connected": 1140,
+      "n_exact_alignment": 1692,
+      "n_total": 1715,
+      "token": "ar"
+    },
+    {
+      "connected_rate": 0.5819935691318328,
+      "n_connected": 181,
+      "n_exact_alignment": 311,
+      "n_total": 311,
+      "token": "are"
+    },
+    {
+      "connected_rate": 0.598941098610192,
+      "n_connected": 905,
+      "n_exact_alignment": 1511,
+      "n_total": 1515,
+      "token": "as"
+    },
+    {
+      "connected_rate": 0.5394736842105263,
+      "n_connected": 41,
+      "n_exact_alignment": 76,
+      "n_total": 79,
+      "token": "ass"
+    },
+    {
+      "connected_rate": 0.5500954198473282,
+      "n_connected": 1153,
+      "n_exact_alignment": 2096,
+      "n_total": 2098,
+      "token": "at"
+    },
+    {
+      "connected_rate": 0.8148148148148148,
+      "n_connected": 154,
+      "n_exact_alignment": 189,
+      "n_total": 191,
+      "token": "au"
+    },
+    {
+      "connected_rate": 0.5308641975308642,
+      "n_connected": 43,
+      "n_exact_alignment": 81,
+      "n_total": 82,
+      "token": "aw"
+    },
+    {
+      "connected_rate": 0.6391752577319587,
+      "n_connected": 310,
+      "n_exact_alignment": 485,
+      "n_total": 497,
+      "token": "ay"
+    },
+    {
+      "connected_rate": 0.5,
+      "n_connected": 32,
+      "n_exact_alignment": 64,
+      "n_total": 65,
+      "token": "ays"
+    },
+    {
+      "connected_rate": 0.6784420289855072,
+      "n_connected": 749,
+      "n_exact_alignment": 1104,
+      "n_total": 1112,
+      "token": "be"
+    },
+    {
+      "connected_rate": 0.5398773006134969,
+      "n_connected": 88,
+      "n_exact_alignment": 163,
+      "n_total": 164,
+      "token": "been"
+    },
+    {
+      "connected_rate": 0.512396694214876,
+      "n_connected": 62,
+      "n_exact_alignment": 121,
+      "n_total": 125,
+      "token": "ber"
+    },
+    {
+      "connected_rate": 0.5627118644067797,
+      "n_connected": 166,
+      "n_exact_alignment": 295,
+      "n_total": 296,
+      "token": "bo"
+    },
+    {
+      "connected_rate": 0.5454545454545454,
+      "n_connected": 318,
+      "n_exact_alignment": 583,
+      "n_total": 587,
+      "token": "ca"
+    },
+    {
+      "connected_rate": 0.7568455640744798,
+      "n_connected": 691,
+      "n_exact_alignment": 913,
+      "n_total": 918,
+      "token": "ce"
+    },
+    {
+      "connected_rate": 0.7,
+      "n_connected": 70,
+      "n_exact_alignment": 100,
+      "n_total": 100,
+      "token": "cen"
+    },
+    {
+      "connected_rate": 0.8181818181818182,
+      "n_connected": 36,
+      "n_exact_alignment": 44,
+      "n_total": 45,
+      "token": "cer"
+    },
+    {
+      "connected_rate": 0.5725806451612904,
+      "n_connected": 71,
+      "n_exact_alignment": 124,
+      "n_total": 125,
+      "token": "ces"
+    },
+    {
+      "connected_rate": 0.7251131221719457,
+      "n_connected": 641,
+      "n_exact_alignment": 884,
+      "n_total": 893,
+      "token": "ch"
+    },
+    {
+      "connected_rate": 0.6012461059190031,
+      "n_connected": 193,
+      "n_exact_alignment": 321,
+      "n_total": 328,
+      "token": "ci"
+    },
+    {
+      "connected_rate": 0.5714285714285714,
+      "n_connected": 116,
+      "n_exact_alignment": 203,
+      "n_total": 203,
+      "token": "ck"
+    },
+    {
+      "connected_rate": 0.5268817204301075,
+      "n_connected": 98,
+      "n_exact_alignment": 186,
+      "n_total": 192,
+      "token": "cl"
+    },
+    {
+      "connected_rate": 0.5796019900497512,
+      "n_connected": 466,
+      "n_exact_alignment": 804,
+      "n_total": 805,
+      "token": "co"
+    },
+    {
+      "connected_rate": 0.5378151260504201,
+      "n_connected": 128,
+      "n_exact_alignment": 238,
+      "n_total": 238,
+      "token": "cr"
+    },
+    {
+      "connected_rate": 0.5287128712871287,
+      "n_connected": 267,
+      "n_exact_alignment": 505,
+      "n_total": 505,
+      "token": "ct"
+    },
+    {
+      "connected_rate": 0.5818181818181818,
+      "n_connected": 128,
+      "n_exact_alignment": 220,
+      "n_total": 224,
+      "token": "cu"
+    },
+    {
+      "connected_rate": 0.7004484304932735,
+      "n_connected": 781,
+      "n_exact_alignment": 1115,
+      "n_total": 1130,
+      "token": "de"
+    },
+    {
+      "connected_rate": 0.5813953488372093,
+      "n_connected": 75,
+      "n_exact_alignment": 129,
+      "n_total": 130,
+      "token": "den"
+    },
+    {
+      "connected_rate": 0.6307053941908713,
+      "n_connected": 152,
+      "n_exact_alignment": 241,
+      "n_total": 248,
+      "token": "der"
+    },
+    {
+      "connected_rate": 0.5163398692810458,
+      "n_connected": 79,
+      "n_exact_alignment": 153,
+      "n_total": 155,
+      "token": "des"
+    },
+    {
+      "connected_rate": 0.5384615384615384,
+      "n_connected": 154,
+      "n_exact_alignment": 286,
+      "n_total": 286,
+      "token": "do"
+    },
+    {
+      "connected_rate": 0.6170212765957447,
+      "n_connected": 58,
+      "n_exact_alignment": 94,
+      "n_total": 94,
+      "token": "dr"
+    },
+    {
+      "connected_rate": 0.5245901639344263,
+      "n_connected": 96,
+      "n_exact_alignment": 183,
+      "n_total": 188,
+      "token": "ds"
+    },
+    {
+      "connected_rate": 0.65,
+      "n_connected": 78,
+      "n_exact_alignment": 120,
+      "n_total": 120,
+      "token": "du"
+    },
+    {
+      "connected_rate": 0.5485232067510548,
+      "n_connected": 1040,
+      "n_exact_alignment": 1896,
+      "n_total": 1901,
+      "token": "ed"
+    },
+    {
+      "connected_rate": 0.6083009079118028,
+      "n_connected": 469,
+      "n_exact_alignment": 771,
+      "n_total": 794,
+      "token": "el"
+    },
+    {
+      "connected_rate": 0.6726384364820847,
+      "n_connected": 413,
+      "n_exact_alignment": 614,
+      "n_total": 615,
+      "token": "em"
+    },
+    {
+      "connected_rate": 0.7871308946672543,
+      "n_connected": 1786,
+      "n_exact_alignment": 2269,
+      "n_total": 2284,
+      "token": "en"
+    },
+    {
+      "connected_rate": 0.8046224961479199,
+      "n_connected": 2611,
+      "n_exact_alignment": 3245,
+      "n_total": 3302,
+      "token": "er"
+    },
+    {
+      "connected_rate": 0.5384615384615384,
+      "n_connected": 266,
+      "n_exact_alignment": 494,
+      "n_total": 504,
+      "token": "ere"
+    },
+    {
+      "connected_rate": 0.5048231511254019,
+      "n_connected": 157,
+      "n_exact_alignment": 311,
+      "n_total": 318,
+      "token": "ers"
+    },
+    {
+      "connected_rate": 0.6578512396694215,
+      "n_connected": 1194,
+      "n_exact_alignment": 1815,
+      "n_total": 1827,
+      "token": "es"
+    },
+    {
+      "connected_rate": 0.5295902883156297,
+      "n_connected": 349,
+      "n_exact_alignment": 659,
+      "n_total": 662,
+      "token": "et"
+    },
+    {
+      "connected_rate": 0.5369127516778524,
+      "n_connected": 240,
+      "n_exact_alignment": 447,
+      "n_total": 451,
+      "token": "ev"
+    },
+    {
+      "connected_rate": 0.65625,
+      "n_connected": 126,
+      "n_exact_alignment": 192,
+      "n_total": 193,
+      "token": "ew"
+    },
+    {
+      "connected_rate": 0.6106194690265486,
+      "n_connected": 138,
+      "n_exact_alignment": 226,
+      "n_total": 226,
+      "token": "ex"
+    },
+    {
+      "connected_rate": 0.6444444444444445,
+      "n_connected": 203,
+      "n_exact_alignment": 315,
+      "n_total": 342,
+      "token": "ey"
+    },
+    {
+      "connected_rate": 0.6412213740458015,
+      "n_connected": 168,
+      "n_exact_alignment": 262,
+      "n_total": 264,
+      "token": "fa"
+    },
+    {
+      "connected_rate": 0.75,
+      "n_connected": 267,
+      "n_exact_alignment": 356,
+      "n_total": 374,
+      "token": "fe"
+    },
+    {
+      "connected_rate": 0.5892857142857143,
+      "n_connected": 66,
+      "n_exact_alignment": 112,
+      "n_total": 117,
+      "token": "fer"
+    },
+    {
+      "connected_rate": 0.6926406926406926,
+      "n_connected": 160,
+      "n_exact_alignment": 231,
+      "n_total": 243,
+      "token": "ff"
+    },
+    {
+      "connected_rate": 0.6721311475409836,
+      "n_connected": 451,
+      "n_exact_alignment": 671,
+      "n_total": 697,
+      "token": "fo"
+    },
+    {
+      "connected_rate": 0.6689419795221843,
+      "n_connected": 196,
+      "n_exact_alignment": 293,
+      "n_total": 302,
+      "token": "fr"
+    },
+    {
+      "connected_rate": 0.7116564417177914,
+      "n_connected": 116,
+      "n_exact_alignment": 163,
+      "n_total": 164,
+      "token": "fu"
+    },
+    {
+      "connected_rate": 0.7274678111587983,
+      "n_connected": 339,
+      "n_exact_alignment": 466,
+      "n_total": 483,
+      "token": "ge"
+    },
+    {
+      "connected_rate": 0.7,
+      "n_connected": 35,
+      "n_exact_alignment": 50,
+      "n_total": 51,
+      "token": "gen"
+    },
+    {
+      "connected_rate": 0.6428571428571429,
+      "n_connected": 45,
+      "n_exact_alignment": 70,
+      "n_total": 72,
+      "token": "ges"
+    },
+    {
+      "connected_rate": 0.5211267605633803,
+      "n_connected": 37,
+      "n_exact_alignment": 71,
+      "n_total": 77,
+      "token": "gn"
+    },
+    {
+      "connected_rate": 0.5421686746987951,
+      "n_connected": 135,
+      "n_exact_alignment": 249,
+      "n_total": 251,
+      "token": "gr"
+    },
+    {
+      "connected_rate": 0.5,
+      "n_connected": 68,
+      "n_exact_alignment": 136,
+      "n_total": 139,
+      "token": "gre"
+    },
+    {
+      "connected_rate": 0.5394304490690033,
+      "n_connected": 985,
+      "n_exact_alignment": 1826,
+      "n_total": 1828,
+      "token": "ha"
+    },
+    {
+      "connected_rate": 0.7519932857742342,
+      "n_connected": 3584,
+      "n_exact_alignment": 4766,
+      "n_total": 4849,
+      "token": "he"
+    },
+    {
+      "connected_rate": 0.5923566878980892,
+      "n_connected": 93,
+      "n_exact_alignment": 157,
+      "n_total": 159,
+      "token": "hen"
+    },
+    {
+      "connected_rate": 0.678082191780822,
+      "n_connected": 396,
+      "n_exact_alignment": 584,
+      "n_total": 591,
+      "token": "her"
+    },
+    {
+      "connected_rate": 0.5343137254901961,
+      "n_connected": 109,
+      "n_exact_alignment": 204,
+      "n_total": 206,
+      "token": "here"
+    },
+    {
+      "connected_rate": 0.5501242750621376,
+      "n_connected": 664,
+      "n_exact_alignment": 1207,
+      "n_total": 1217,
+      "token": "hi"
+    },
+    {
+      "connected_rate": 0.5164705882352941,
+      "n_connected": 439,
+      "n_exact_alignment": 850,
+      "n_total": 862,
+      "token": "ho"
+    },
+    {
+      "connected_rate": 0.5155038759689923,
+      "n_connected": 133,
+      "n_exact_alignment": 258,
+      "n_total": 260,
+      "token": "ht"
+    },
+    {
+      "connected_rate": 0.6666666666666666,
+      "n_connected": 266,
+      "n_exact_alignment": 399,
+      "n_total": 401,
+      "token": "ke"
+    },
+    {
+      "connected_rate": 0.6153846153846154,
+      "n_connected": 32,
+      "n_exact_alignment": 52,
+      "n_total": 52,
+      "token": "ken"
+    },
+    {
+      "connected_rate": 0.547945205479452,
+      "n_connected": 80,
+      "n_exact_alignment": 146,
+      "n_total": 147,
+      "token": "ki"
+    },
+    {
+      "connected_rate": 0.5692307692307692,
+      "n_connected": 37,
+      "n_exact_alignment": 65,
+      "n_total": 65,
+      "token": "kn"
+    },
+    {
+      "connected_rate": 0.5128205128205128,
+      "n_connected": 40,
+      "n_exact_alignment": 78,
+      "n_total": 79,
+      "token": "lay"
+    },
+    {
+      "connected_rate": 0.6784313725490196,
+      "n_connected": 865,
+      "n_exact_alignment": 1275,
+      "n_total": 1328,
+      "token": "le"
+    },
+    {
+      "connected_rate": 0.5086767895878525,
+      "n_connected": 469,
+      "n_exact_alignment": 922,
+      "n_total": 937,
+      "token": "li"
+    },
+    {
+      "connected_rate": 0.5964546402502607,
+      "n_connected": 572,
+      "n_exact_alignment": 959,
+      "n_total": 1013,
+      "token": "ll"
+    },
+    {
+      "connected_rate": 0.5863874345549738,
+      "n_connected": 336,
+      "n_exact_alignment": 573,
+      "n_total": 654,
+      "token": "ly"
+    },
+    {
+      "connected_rate": 0.6485319516407599,
+      "n_connected": 751,
+      "n_exact_alignment": 1158,
+      "n_total": 1160,
+      "token": "me"
+    },
+    {
+      "connected_rate": 0.6410256410256411,
+      "n_connected": 250,
+      "n_exact_alignment": 390,
+      "n_total": 393,
+      "token": "men"
+    },
+    {
+      "connected_rate": 0.5961538461538461,
+      "n_connected": 62,
+      "n_exact_alignment": 104,
+      "n_total": 104,
+      "token": "mer"
+    },
+    {
+      "connected_rate": 0.5159235668789809,
+      "n_connected": 81,
+      "n_exact_alignment": 157,
+      "n_total": 157,
+      "token": "mu"
+    },
+    {
+      "connected_rate": 0.5892857142857143,
+      "n_connected": 33,
+      "n_exact_alignment": 56,
+      "n_total": 56,
+      "token": "my"
+    },
+    {
+      "connected_rate": 0.6501403180542563,
+      "n_connected": 695,
+      "n_exact_alignment": 1069,
+      "n_total": 1075,
+      "token": "ne"
+    },
+    {
+      "connected_rate": 0.5747126436781609,
+      "n_connected": 50,
+      "n_exact_alignment": 87,
+      "n_total": 87,
+      "token": "nes"
+    },
+    {
+      "connected_rate": 0.5384615384615384,
+      "n_connected": 42,
+      "n_exact_alignment": 78,
+      "n_total": 78,
+      "token": "new"
+    },
+    {
+      "connected_rate": 0.5585585585585585,
+      "n_connected": 62,
+      "n_exact_alignment": 111,
+      "n_total": 111,
+      "token": "nu"
+    },
+    {
+      "connected_rate": 0.5585143658023827,
+      "n_connected": 797,
+      "n_exact_alignment": 1427,
+      "n_total": 1466,
+      "token": "of"
+    },
+    {
+      "connected_rate": 0.501779359430605,
+      "n_connected": 423,
+      "n_exact_alignment": 843,
+      "n_total": 843,
+      "token": "om"
+    },
+    {
+      "connected_rate": 0.5971926839642705,
+      "n_connected": 1404,
+      "n_exact_alignment": 2351,
+      "n_total": 2365,
+      "token": "on"
+    },
+    {
+      "connected_rate": 0.6521739130434783,
+      "n_connected": 225,
+      "n_exact_alignment": 345,
+      "n_total": 348,
+      "token": "oo"
+    },
+    {
+      "connected_rate": 0.6038506417736289,
+      "n_connected": 1035,
+      "n_exact_alignment": 1714,
+      "n_total": 1723,
+      "token": "or"
+    },
+    {
+      "connected_rate": 0.5653333333333334,
+      "n_connected": 212,
+      "n_exact_alignment": 375,
+      "n_total": 379,
+      "token": "os"
+    },
+    {
+      "connected_rate": 0.6120027913468249,
+      "n_connected": 877,
+      "n_exact_alignment": 1433,
+      "n_total": 1445,
+      "token": "ou"
+    },
+    {
+      "connected_rate": 0.5220588235294118,
+      "n_connected": 142,
+      "n_exact_alignment": 272,
+      "n_total": 280,
+      "token": "our"
+    },
+    {
+      "connected_rate": 0.5047619047619047,
+      "n_connected": 106,
+      "n_exact_alignment": 210,
+      "n_total": 211,
+      "token": "out"
+    },
+    {
+      "connected_rate": 0.5660130718954248,
+      "n_connected": 433,
+      "n_exact_alignment": 765,
+      "n_total": 776,
+      "token": "pe"
+    },
+    {
+      "connected_rate": 0.5,
+      "n_connected": 55,
+      "n_exact_alignment": 110,
+      "n_total": 113,
+      "token": "pen"
+    },
+    {
+      "connected_rate": 0.6501145912910619,
+      "n_connected": 1702,
+      "n_exact_alignment": 2618,
+      "n_total": 2638,
+      "token": "re"
+    },
+    {
+      "connected_rate": 0.5081967213114754,
+      "n_connected": 62,
+      "n_exact_alignment": 122,
+      "n_total": 122,
+      "token": "rem"
+    },
+    {
+      "connected_rate": 0.53125,
+      "n_connected": 85,
+      "n_exact_alignment": 160,
+      "n_total": 160,
+      "token": "ren"
+    },
+    {
+      "connected_rate": 0.5432835820895522,
+      "n_connected": 546,
+      "n_exact_alignment": 1005,
+      "n_total": 1009,
+      "token": "ro"
+    },
+    {
+      "connected_rate": 0.5277777777777778,
+      "n_connected": 190,
+      "n_exact_alignment": 360,
+      "n_total": 394,
+      "token": "ry"
+    },
+    {
+      "connected_rate": 0.6264775413711584,
+      "n_connected": 795,
+      "n_exact_alignment": 1269,
+      "n_total": 1274,
+      "token": "se"
+    },
+    {
+      "connected_rate": 0.5348837209302325,
+      "n_connected": 46,
+      "n_exact_alignment": 86,
+      "n_total": 89,
+      "token": "sen"
+    },
+    {
+      "connected_rate": 0.5316455696202531,
+      "n_connected": 42,
+      "n_exact_alignment": 79,
+      "n_total": 81,
+      "token": "ser"
+    },
+    {
+      "connected_rate": 0.6257796257796258,
+      "n_connected": 301,
+      "n_exact_alignment": 481,
+      "n_total": 498,
+      "token": "ss"
+    },
+    {
+      "connected_rate": 0.5448634590377113,
+      "n_connected": 419,
+      "n_exact_alignment": 769,
+      "n_total": 775,
+      "token": "ta"
+    },
+    {
+      "connected_rate": 0.7245145631067961,
+      "n_connected": 1194,
+      "n_exact_alignment": 1648,
+      "n_total": 1679,
+      "token": "te"
+    },
+    {
+      "connected_rate": 0.5945945945945946,
+      "n_connected": 66,
+      "n_exact_alignment": 111,
+      "n_total": 111,
+      "token": "tem"
+    },
+    {
+      "connected_rate": 0.6111111111111112,
+      "n_connected": 66,
+      "n_exact_alignment": 108,
+      "n_total": 108,
+      "token": "ten"
+    },
+    {
+      "connected_rate": 0.6404715127701375,
+      "n_connected": 326,
+      "n_exact_alignment": 509,
+      "n_total": 528,
+      "token": "ter"
+    },
+    {
+      "connected_rate": 0.6938694267515924,
+      "n_connected": 3486,
+      "n_exact_alignment": 5024,
+      "n_total": 5049,
+      "token": "th"
+    },
+    {
+      "connected_rate": 0.5859327217125382,
+      "n_connected": 1916,
+      "n_exact_alignment": 3270,
+      "n_total": 3337,
+      "token": "the"
+    },
+    {
+      "connected_rate": 0.5368421052631579,
+      "n_connected": 51,
+      "n_exact_alignment": 95,
+      "n_total": 95,
+      "token": "them"
+    },
+    {
+      "connected_rate": 0.5545454545454546,
+      "n_connected": 183,
+      "n_exact_alignment": 330,
+      "n_total": 337,
+      "token": "ther"
+    },
+    {
+      "connected_rate": 0.5138339920948617,
+      "n_connected": 130,
+      "n_exact_alignment": 253,
+      "n_total": 255,
+      "token": "thi"
+    },
+    {
+      "connected_rate": 0.70874861572536,
+      "n_connected": 1280,
+      "n_exact_alignment": 1806,
+      "n_total": 1846,
+      "token": "to"
+    },
+    {
+      "connected_rate": 0.5277777777777778,
+      "n_connected": 38,
+      "n_exact_alignment": 72,
+      "n_total": 72,
+      "token": "ton"
+    },
+    {
+      "connected_rate": 0.5333333333333333,
+      "n_connected": 32,
+      "n_exact_alignment": 60,
+      "n_total": 61,
+      "token": "too"
+    },
+    {
+      "connected_rate": 0.6873977086743044,
+      "n_connected": 420,
+      "n_exact_alignment": 611,
+      "n_total": 620,
+      "token": "tr"
+    },
+    {
+      "connected_rate": 0.5794392523364486,
+      "n_connected": 62,
+      "n_exact_alignment": 107,
+      "n_total": 109,
+      "token": "tre"
+    },
+    {
+      "connected_rate": 0.6,
+      "n_connected": 33,
+      "n_exact_alignment": 55,
+      "n_total": 60,
+      "token": "try"
+    },
+    {
+      "connected_rate": 0.6,
+      "n_connected": 237,
+      "n_exact_alignment": 395,
+      "n_total": 423,
+      "token": "ts"
+    },
+    {
+      "connected_rate": 0.7737003058103975,
+      "n_connected": 253,
+      "n_exact_alignment": 327,
+      "n_total": 333,
+      "token": "tt"
+    },
+    {
+      "connected_rate": 0.684931506849315,
+      "n_connected": 50,
+      "n_exact_alignment": 73,
+      "n_total": 77,
+      "token": "tter"
+    },
+    {
+      "connected_rate": 0.7666666666666667,
+      "n_connected": 207,
+      "n_exact_alignment": 270,
+      "n_total": 270,
+      "token": "tu"
+    },
+    {
+      "connected_rate": 0.5448275862068965,
+      "n_connected": 79,
+      "n_exact_alignment": 145,
+      "n_total": 146,
+      "token": "tur"
+    },
+    {
+      "connected_rate": 0.6138613861386139,
+      "n_connected": 62,
+      "n_exact_alignment": 101,
+      "n_total": 102,
+      "token": "tw"
+    },
+    {
+      "connected_rate": 0.6118721461187214,
+      "n_connected": 134,
+      "n_exact_alignment": 219,
+      "n_total": 243,
+      "token": "ty"
+    },
+    {
+      "connected_rate": 0.7232704402515723,
+      "n_connected": 115,
+      "n_exact_alignment": 159,
+      "n_total": 159,
+      "token": "ue"
+    },
+    {
+      "connected_rate": 0.5897858319604613,
+      "n_connected": 358,
+      "n_exact_alignment": 607,
+      "n_total": 622,
+      "token": "un"
+    },
+    {
+      "connected_rate": 0.6020671834625323,
+      "n_connected": 466,
+      "n_exact_alignment": 774,
+      "n_total": 789,
+      "token": "ur"
+    },
+    {
+      "connected_rate": 0.5190476190476191,
+      "n_connected": 327,
+      "n_exact_alignment": 630,
+      "n_total": 635,
+      "token": "us"
+    },
+    {
+      "connected_rate": 0.5370919881305638,
+      "n_connected": 362,
+      "n_exact_alignment": 674,
+      "n_total": 676,
+      "token": "ut"
+    },
+    {
+      "connected_rate": 0.514018691588785,
+      "n_connected": 55,
+      "n_exact_alignment": 107,
+      "n_total": 108,
+      "token": "ves"
+    },
+    {
+      "connected_rate": 0.5209790209790209,
+      "n_connected": 298,
+      "n_exact_alignment": 572,
+      "n_total": 574,
+      "token": "we"
+    }
+  ]
+}

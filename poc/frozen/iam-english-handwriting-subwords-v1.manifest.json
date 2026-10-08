@@ -1,0 +1,41 @@
+{
+  "candidate_pool_sha256": "a0d7cd4569aa8feffe65a8816b41e6579ab937efab8d9cf4ab25513b1762aebc",
+  "existing_bigram_artifact_unchanged": true,
+  "models": [
+    {
+      "algorithm": "handwriting-aware-bpe",
+      "ctc_class_count": 225,
+      "filename": "iam-english-handwriting-bpe-v1.json",
+      "model_version": "iam-english-handwriting-bpe-v1",
+      "sha256": "a504c2306200faf6eab98f3feef6f98b81e6e6c6c7f707cf31aa3399a660be47",
+      "singleton_count": 79,
+      "source_model_sha256": "9dedba1087e8e011633251b22159f857fb2e80babc15c877f7ffb03d7a985aad",
+      "subword_count": 145
+    },
+    {
+      "algorithm": "handwriting-aware-unigram",
+      "ctc_class_count": 225,
+      "filename": "iam-english-handwriting-unigram-v1.json",
+      "model_version": "iam-english-handwriting-unigram-v1",
+      "sha256": "af2bc8455afd796367737857f3a36f1deb45f07ec9783a4bbd7f15057f2b9476",
+      "singleton_count": 79,
+      "source_model_sha256": "1ea98cc926fa3658dc6455a8d9e24ebb3a42b72e15848e9aca0bb7bfa00753c5",
+      "subword_count": 145
+    }
+  ],
+  "release_date": "2026-10-08",
+  "release_version": "iam-english-handwriting-subwords-v1",
+  "schema_version": "dtlr.handwriting-subword-release.v1",
+  "scientific_status": "Frozen experimental release before recognition evaluation; no optimality or recognition-performance claim.",
+  "sole_dataset": "IAM",
+  "sole_split": "train",
+  "source_sha256": {
+    "detections": "5e68b4c2ef1db15b5d1776ba1d4b7696ba9289f81dd4dd018598dd7d6aea2b32",
+    "evidence": "9c75d6d240127c2e6a6c4dffd83c491beab6a31dc4be204461861c1913740bd3",
+    "frozen_bigram": "2fbb81479211454d8ad028d8af76eb26e76b75b80408a1a1e1f4efa15ab26a92",
+    "manifest": "82cb95a14e71ab5b70c868ca1676b3f628552fabac395fbd30039fc7798bf190",
+    "scores": "45c86a9f703ebc3684563ec2a840e7c34241aa76e84d692be46cf11bfec27055",
+    "selection": "7893dfba4febe6df99cf0bdb0c74fabe7b736d2a6af05033d8638b90455bc1c2"
+  },
+  "status": "frozen-experiment-policy"
+}

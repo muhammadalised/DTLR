@@ -1,6 +1,10 @@
 # IAM handwriting-aware BPE and Unigram prototype
 
-Status: experimental implementation, not a frozen or held-out validated tokenizer.
+Status: original experimental prototype snapshot. Its exact learned HW BPE and
+Unigram parameters were subsequently frozen as v1; see
+[the freeze provenance note](iam-handwriting-subwords-v1-freeze.md). No held-out
+validation or recognition gains are established. The ignored outputs listed
+below retain their original prototype status and historical provenance.
 The existing `iam-english-handwriting-bigram-v1` artifact remains unchanged.
 All new models and measurements use IAM train only. No TVA files, READ evidence,
 FAU data, or other downstream datasets are used.

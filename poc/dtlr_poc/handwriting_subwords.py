@@ -321,6 +321,10 @@ def train_unigram(corpus, candidates, budget=145, singletons=None, iterations=8,
 
 class HandwritingSubwordTokenizer:
     def __init__(self, model):
+        if (model.get("status") == "frozen-experiment-policy" or "freeze" in model
+                or str(model.get("model_version", "")).startswith("iam-english-handwriting-")):
+            from .subword_freeze import validate_frozen_subword_artifact
+            validate_frozen_subword_artifact(model)
         algorithms = {SCHEMA: ("handwriting-aware-bpe", "handwriting-aware-unigram"),
                       TEXT_SCHEMA: ("text-only-bpe", "text-only-unigram")}
         if model.get("algorithm") not in algorithms.get(model.get("schema_version"), ()):

@@ -378,3 +378,29 @@ are under ignored `outputs/iam-long-span-qa-v1/` and
 `outputs/iam-text-controls-v2/`. The scientific distinction is explicit:
 compression, automatic image-support agreement, and recognition accuracy are
 separate outcomes. These experiments establish the first two on training data.
+
+## Frozen handwriting-aware BPE and Unigram v1
+
+The exact audited models are available for inference and recognition experiments:
+
+| Model | Version | CTC classes |
+|---|---|---:|
+| HW BPE | `iam-english-handwriting-bpe-v1` | 225 |
+| HW Unigram | `iam-english-handwriting-unigram-v1` | 225 |
+
+Files and checksummed manifest are in `poc/frozen/` relative to the repository
+root. See [the freeze provenance note](provenance/iam-handwriting-subwords-v1-freeze.md)
+for pinned hashes, usage, verification, and limits. These are frozen experimental
+configurations; freezing establishes reproducibility, not recognition gains.
+
+From the repository root, verify the release without modifying it:
+
+```bash
+PYTHONPATH=poc conda run --no-capture-output -n dtlr-poc python \
+  poc/scripts/freeze_iam_handwriting_subwords.py --check
+```
+
+Use `dtlr_poc.subword_freeze.load_frozen_subword_model` with the existing
+`HandwritingSubwordTokenizer` encoder. The loader needs only the released model
+JSON and the POC package; it does not read IAM datasets or ignored experiment
+outputs. Keep alphabet or encoding adaptations separately versioned.

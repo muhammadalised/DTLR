@@ -147,3 +147,32 @@ artifact retains its pinned hash. Notebook work remains separate. No TVA,
 READ, FAU, or other downstream dataset is accessed, and nothing is pushed.
 Next scientific step: independent predeclared review and an IAM recognition
 comparison/evaluation policy before training/evaluation claims.
+
+## Frozen HW BPE / Unigram experimental releases (2026-10-08)
+
+The audited HW models are now released under fixed versions:
+
+- `poc/frozen/iam-english-handwriting-bpe-v1.json`
+- `poc/frozen/iam-english-handwriting-unigram-v1.json`
+- `poc/frozen/iam-english-handwriting-subwords-v1.manifest.json`
+
+Status is `frozen-experiment-policy`. Both retain the exact original 79-singleton,
+145-subword, 225-class IAM-training-only models; BPE merges, Unigram probabilities,
+IDs, evidence counts, policies, and original training provenance are preserved.
+The existing frozen 222-class bigram is byte-identical. Text-only controls remain
+separate prototypes. Read `poc/provenance/iam-handwriting-subwords-v1-freeze.md`
+for checksums, scientific limitations, reproduction, and loading examples.
+
+New freeze implementation: `poc/dtlr_poc/subword_freeze.py`; CLI:
+`poc/scripts/freeze_iam_handwriting_subwords.py`. The existing subword encoder
+validates frozen metadata and exact source reconstruction. The strict loader
+also checks actual file bytes. Generation pins source/candidate hashes and
+refuses to overwrite changed release files. `--check` verifies without writing.
+
+Verification: 75 CPU tests pass; every IAM train line encodes identically to the
+original models with exact round trips and no blank; a second freeze build with
+`PYTHONHASHSEED=19` is byte-identical. Frozen status fixes the experiment before
+recognition evaluation and does not claim optimal thresholds, held-out visual
+validation, or recognition gains. The user's qualitative gallery review is
+recorded as informal feedback; per-case human annotations remain pending.
+Nothing is pushed and no downstream dataset is accessed.
