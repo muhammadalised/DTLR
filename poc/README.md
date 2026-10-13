@@ -1,5 +1,33 @@
 # DTLR → TVA bigram POC (August 28)
 
+## Current responsibility: connectivity evidence (2026-10-10)
+
+Vocabulary selection and BPE/Unigram fitting now live in TVA's
+`tva/handwriting/training.py`, called by `tva/handwriting_tokenizers.py`.
+DTLR supplies IAM character localization, transcription alignment, CCL evidence,
+and split-specific aggregate scores. The compact export retains transcription
+text, offsets, usable/exact component IDs, abstentions, and aggregate scores;
+it performs no vocabulary selection and does not require TVA to run.
+
+```bash
+python poc/scripts/export_iam_tokenizer_evidence.py \
+  --iam-train-dir /home/artellisys/dtlr-output/iam-train-full \
+  --output /home/artellisys/TVA/artifacts/evidence/iam/iam_connectivity_v1.json.gz
+```
+
+The v1 export authenticates all five original IAM/train inputs, reconstructs
+scores from occurrence rows, and refuses to replace differing export bytes.
+No raw images or boxes are needed by TVA after export. Use TVA's
+`train_ed_tokenizers.ipynb` to select bigrams, learn BPE merges, or fit Unigram.
+
+The three former training CLIs now point to TVA. Historical Python APIs have
+small lazy compatibility wrappers; install TVA or set `TVA_ROOT` if its checkout
+is not the sibling directory. Frozen-model inference and evidence export do
+not require TVA. The frozen artifacts, source snapshots, prior provenance notes,
+and descriptive comparison interfaces are preserved for completed experiments.
+Training commands further below describe historical work and are superseded by
+this division of responsibilities.
+
 This directory is an additive adapter around upstream DTLR. It does not change
 the model, decoding, IAM splits, or threshold/NMS behavior. The initial scope is
 IAM line images and within-token adjacent character pairs (pairs touching
@@ -404,3 +432,19 @@ Use `dtlr_poc.subword_freeze.load_frozen_subword_model` with the existing
 `HandwritingSubwordTokenizer` encoder. The loader needs only the released model
 JSON and the POC package; it does not read IAM datasets or ignored experiment
 outputs. Keep alphabet or encoding adaptations separately versioned.
+
+## IAM tokenizer distribution notebook
+
+Open [`notebooks/IAM_tokenizer_distributions.ipynb`](notebooks/IAM_tokenizer_distributions.ipynb)
+with the `dtlr-poc` Python kernel and run all cells. It compares raw letter-pair
+frequencies, connectivity rates, selected vocabulary lengths, emitted token
+frequencies and lengths, image-evidence categories, pair-vocabulary overlap,
+and short segmentation examples for HW Bigram, BPE, and Unigram.
+
+The notebook verifies the pinned IAM train exports under
+`/home/artellisys/dtlr-output/iam-train-full/` and the three frozen models. It
+uses the existing in-memory bigram alphabet adapter for the full IAM training
+alphabet. It does not retrain tokenizers or change frozen files. Aggregate
+CSV tables and the summary are saved under ignored
+`outputs/iam-tokenizer-distributions-v1/`; an executed copy with six plots is
+available there locally. Results describe training distributions, not CER/WER.

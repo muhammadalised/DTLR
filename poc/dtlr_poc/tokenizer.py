@@ -1,9 +1,10 @@
-"""Train-derived IAM bigram vocabulary and deterministic text segmentation."""
+"""Historical IAM bigram inference and compatibility with TVA-owned selection."""
 
 from dataclasses import dataclass
 import json
 from pathlib import Path
 import unicodedata
+from ._tva_training import load_training
 
 
 MODEL_SCHEMA = "dtlr.handwriting-bigram-tokenizer.v1"
@@ -13,97 +14,14 @@ FROZEN_IAM_MANIFEST_SHA256 = "82cb95a14e71ab5b70c868ca1676b3f628552fabac395fbd30
 FROZEN_IAM_SOURCE_MODEL_SHA256 = "36db922860cbd501a6c5a1297dbf7d998abdbe1a337513acb00b44e74fbd9334"
 
 
-def pair_allowed(pair: str, policy: str) -> bool:
-    if len(pair) != 2:
-        return False
-    if policy == "letters-only":
-        return all(char.isalpha() for char in pair)
-    if policy == "non-whitespace":
-        return not any(char.isspace() for char in pair)
-    raise ValueError(f"unsupported pair policy: {policy}")
+def pair_allowed(*args, **kwargs):
+    """Historical API; selection policy is implemented in TVA."""
+    return load_training().pair_allowed(*args, **kwargs)
 
 
-def build_model(
-    scores: list[dict],
-    source_sha256: str,
-    minimum_count: int,
-    rate_threshold: float,
-    pair_policy: str = "letters-only",
-    required_characters: tuple[str, ...] = (" ",),
-) -> dict:
-    if minimum_count <= 0:
-        raise ValueError("minimum_count must be positive")
-    if not 0.0 <= rate_threshold <= 1.0:
-        raise ValueError("rate_threshold must be between zero and one")
-    if not scores:
-        raise ValueError("bigram score input is empty")
-    if any(len(char) != 1 for char in required_characters):
-        raise ValueError("required characters must each contain exactly one character")
-    pairs = set()
-    characters = set(required_characters)
-    vocabulary = []
-    for row in scores:
-        if row.get("schema_version") != "dtlr.bigram-scores.v5":
-            raise ValueError("unsupported bigram score schema")
-        if row.get("dataset") != "IAM" or row.get("split") != "train":
-            raise ValueError("tokenizer vocabulary must be derived from IAM train scores only")
-        if row.get("connectivity_method") != "dominant-core-v3":
-            raise ValueError("tokenizer scores do not use frozen dominant-core-v3")
-        pair = row["pair"]
-        if len(pair) != 2:
-            raise ValueError(f"score pair must contain exactly two characters: {pair!r}")
-        if pair in pairs:
-            raise ValueError(f"duplicate score row for pair {pair!r}")
-        pairs.add(pair)
-        characters.update(pair)
-        count = row.get("n_exact_alignment", 0)
-        rate = row.get("exact_alignment_connected_rate")
-        if (
-            pair_allowed(pair, pair_policy)
-            and count >= minimum_count
-            and rate is not None
-            and rate >= rate_threshold
-        ):
-            vocabulary.append({
-                "token": pair,
-                "n_exact_alignment": count,
-                "exact_alignment_connected_rate": rate,
-                "utility": rate,
-            })
-    vocabulary.sort(key=lambda row: row["token"])
-    # TVA reserves ID 0 for the CTC blank, represented by the empty string.
-    ordered_tokens = [""] + sorted(characters) + [row["token"] for row in vocabulary]
-    vocab = {token: index for index, token in enumerate(ordered_tokens)}
-    idx_token = {str(index): token for token, index in vocab.items()}
-    return {
-        "schema_version": MODEL_SCHEMA,
-        "status": "provisional-demo-policy",
-        "dataset": "IAM",
-        "training_split": "train",
-        "connectivity_method": "dominant-core-v3",
-        "score_field": "exact_alignment_connected_rate",
-        "count_field": "n_exact_alignment",
-        "blank_token": "",
-        "blank_id": 0,
-        "source_scores_sha256": source_sha256,
-        "policy": {
-            "minimum_count": minimum_count,
-            "rate_threshold": rate_threshold,
-            "pair_policy": pair_policy,
-            "overlap_resolution": "maximum-total-utility-non-overlapping-v1",
-            "single_character_utility": 0.0,
-            "required_characters": list(required_characters),
-        },
-        "vocab": vocab,
-        "idx_token": idx_token,
-        "size": len(vocab),
-        "eligible_bigram_count": len(vocabulary),
-        "vocabulary": vocabulary,
-        "note": (
-            "Training-derived demonstration model. Policy thresholds are not held-out "
-            "performance and must be validated before thesis claims."
-        ),
-    }
+def build_model(*args, **kwargs):
+    """Historical API; bigram selection is implemented in TVA."""
+    return load_training().build_bigram_model(*args, **kwargs)
 
 
 def build_frozen_iam_artifact(
@@ -189,9 +107,9 @@ class HandwritingBigramTokenizer:
     """TVA-familiar tokenizer interface with handwriting-aware DP segmentation.
 
     The public shape intentionally mirrors TVA's BigramTokenizer (`vocab`,
-    `idx_token`, `size`, `load`, `encode`, and `decode`). Token selection still
-    uses this project's maximum-total-utility dynamic program, not TVA's greedy
-    left-to-right bigram matching.
+    `idx_token`, `size`, `load`, `encode`, and `decode`). This historical IAM
+    reference uses maximum-total-utility DP for text segmentation. Vocabulary
+    selection is implemented in TVA and reached through the compatibility API.
     """
 
     def __init__(self, model: dict | None = None) -> None:
